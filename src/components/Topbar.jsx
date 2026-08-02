@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { logoBaires } from "../data/logos";
 
 const links = [
   { to: "/acuerdos", label: "Acuerdos" },
@@ -11,7 +12,13 @@ export default function Topbar() {
   return (
     <div className="topbar">
       <Link to="/" className="wordmark">
-        BAI<span>RES</span>
+        {logoBaires ? (
+          <img src={logoBaires} alt="Baires" className="brand-logo" />
+        ) : (
+          <span className="wordmark-text">
+            BAI<em>RES</em>
+          </span>
+        )}
       </Link>
       <nav className="top-nav">
         {links.map((l) => (
