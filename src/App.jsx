@@ -8,6 +8,7 @@ export default function App() {
       <Route path="/" element={<Home />} />
       <Route path="/super/:slug" element={<Supermercado />} />
       <Route path="/super/:slug/subir" element={<Supermercado />} />
+      <Route path="/super/:slug/ver" element={<Supermercado />} />
     </Routes>
   );
 }

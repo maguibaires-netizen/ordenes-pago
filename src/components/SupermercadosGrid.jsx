@@ -30,7 +30,7 @@ export default function SupermercadosGrid() {
                     Subir OP
                   </button>
                 </Link>
-                <Link to={`/super/${s.slug}`}>
+                <Link to={`/super/${s.slug}/ver`}>
                   <button>
                     <Eye size={14} strokeWidth={1.8} />
                     Ver OP

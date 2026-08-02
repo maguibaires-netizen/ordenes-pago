@@ -387,3 +387,314 @@ a {
   background: var(--accent-ink);
   color: var(--white);
 }
+
+/* ---------- página de detalle por supermercado ---------- */
+
+.crumb {
+  margin: 8px 0 4px;
+  font-size: 13px;
+}
+
+.crumb a {
+  color: var(--slate);
+}
+
+.crumb a:hover {
+  color: var(--accent-ink);
+}
+
+.page-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 6px 0 26px;
+}
+
+.page-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--white);
+  border: 1px solid var(--line-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.page-badge img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8px;
+}
+
+.page-head h1 {
+  font-size: 19px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--white);
+  padding: 4px;
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  width: fit-content;
+  margin-bottom: 26px;
+}
+
+.tabs button {
+  border: none;
+  background: transparent;
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--slate);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tabs button.active {
+  background: var(--ink);
+  color: var(--white);
+}
+
+.dropzone {
+  background: var(--white);
+  border: 1.5px dashed var(--line);
+  border-radius: 16px;
+  padding: 52px 24px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.18s var(--ease), background 0.18s var(--ease);
+  cursor: pointer;
+}
+
+.dropzone:hover,
+.dropzone-sobre {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.dropzone-ic {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+}
+
+.dropzone h3 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.dropzone p {
+  font-size: 13px;
+  color: var(--slate);
+  margin: 0;
+}
+
+.dropzone-formatos {
+  margin-top: 14px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.dropzone-formatos span {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--slate);
+  background: var(--paper);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.review-card {
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  padding: 22px;
+  margin-top: 18px;
+}
+
+.review-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.file-ic {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.file-sub {
+  font-size: 12px;
+  color: var(--slate);
+}
+
+.status {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--slate);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-ok {
+  color: #4f7743;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--slate);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.field input {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 9px 11px;
+  font-size: 13px;
+  font-family: var(--font-sans);
+}
+
+.field input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.cell-input {
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 7px;
+  padding: 5px 7px;
+  font-size: 12.5px;
+  font-family: var(--font-sans);
+  width: 100%;
+  color: var(--ink);
+}
+
+.cell-input:hover {
+  border-color: var(--line);
+}
+
+.cell-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--white);
+}
+
+.num-input {
+  text-align: right;
+}
+
+.review-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.warn-text {
+  font-size: 12.5px;
+  color: #a06816;
+  background: #fdf1de;
+  padding: 8px 12px;
+  border-radius: 9px;
+  margin-bottom: 16px;
+}
+
+.error-text {
+  font-size: 13px;
+  color: #b0433f;
+  margin-top: 10px;
+}
+
+.empty-state {
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--slate);
+  font-size: 13px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--white);
+  border-radius: 10px;
+  padding: 8px 14px;
+  box-shadow: var(--shadow-sm);
+  flex: 1;
+  max-width: 320px;
+  color: var(--slate);
+}
+
+.search input {
+  border: none;
+  outline: none;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  width: 100%;
+  background: transparent;
+}
+
+.chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--slate);
+}
+
+.estado-cell select.cell-input {
+  border: 1px solid var(--line);
+}
