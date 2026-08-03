@@ -16,11 +16,11 @@ export async function listarOrdenes(slug) {
   return data.filas;
 }
 
-export async function actualizarEstado(slug, rowIndex, estado) {
-  const res = await fetch("/api/ordenes/update-estado", {
+export async function actualizarCelda(slug, rowIndex, campo, valor) {
+  const res = await fetch("/api/ordenes/actualizar-celda", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ slug, rowIndex, estado }),
+    body: JSON.stringify({ slug, rowIndex, campo, valor }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Error al actualizar");

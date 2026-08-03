@@ -6,7 +6,7 @@ import Dropzone from "../components/Dropzone";
 import { supermercados } from "../data/supermercados";
 import { logoDe } from "../data/logos";
 import { PARSERS, ESTADOS } from "../parsers/registro";
-import { guardarOrdenes, listarOrdenes, actualizarEstado } from "../lib/api";
+import { guardarOrdenes, listarOrdenes, actualizarCelda } from "../lib/api";
 
 function claseEstado(estado) {
   const mapa = {
@@ -233,7 +233,7 @@ function PanelVer({ slug }) {
   const [filas, setFilas] = useState(null);
   const [error, setError] = useState("");
   const [busqueda, setBusqueda] = useState("");
-  const [editando, setEditando] = useState(null);
+  const [editando, setEditando] = useState(null); // `${rowIndex}-${campo}`
 
   const cargar = useCallback(async () => {
     setError("");
@@ -249,11 +249,11 @@ function PanelVer({ slug }) {
     cargar();
   }, [cargar]);
 
-  async function cambiarEstado(fila, nuevoEstado) {
-    setFilas((prev) => prev.map((f) => (f.rowIndex === fila.rowIndex ? { ...f, estado: nuevoEstado } : f)));
+  async function guardarCampo(fila, campo, valor) {
+    setFilas((prev) => prev.map((f) => (f.rowIndex === fila.rowIndex ? { ...f, [campo]: valor } : f)));
     setEditando(null);
     try {
-      await actualizarEstado(slug, fila.rowIndex, nuevoEstado);
+      await actualizarCelda(slug, fila.rowIndex, campo, valor);
     } catch (err) {
       setError(err.message);
     }
@@ -288,37 +288,80 @@ function PanelVer({ slug }) {
             </tr>
           </thead>
           <tbody>
-            {filtradas.map((f) => (
-              <tr key={f.rowIndex}>
-                <td>{f.nroAviso}</td>
-                <td className="mono">{f.comprobante}</td>
-                <td>{f.categoria}</td>
-                <td className="estado-cell">
-                  {editando === f.rowIndex ? (
-                    <select
-                      autoFocus
-                      className="cell-input"
-                      value={f.estado}
-                      onChange={(e) => cambiarEstado(f, e.target.value)}
-                      onBlur={() => setEditando(null)}
-                    >
-                      {ESTADOS.map((op) => <option key={op} value={op}>{op}</option>)}
-                    </select>
-                  ) : (
-                    <button className="chip-btn" onClick={() => setEditando(f.rowIndex)}>
-                      <span className={`chip ${claseEstado(f.estado)}`}>{f.estado || "—"}</span>
-                      <ChevronDown size={12} />
-                    </button>
-                  )}
-                </td>
-                <td>{f.fecha}</td>
-                <td className="num">{money(f.importe)}</td>
-                <td>{f.notas}</td>
-              </tr>
-            ))}
+            {filtradas.map((f, i) => {
+              const nuevoBloque = i > 0 && filtradas[i - 1].nroAviso !== f.nroAviso;
+              return (
+                <CeldaFila
+                  key={f.rowIndex}
+                  fila={f}
+                  nuevoBloque={nuevoBloque}
+                  editando={editando}
+                  setEditando={setEditando}
+                  guardarCampo={guardarCampo}
+                />
+              );
+            })}
           </tbody>
         </table>
       </div>
     </div>
+  );
+}
+
+function CeldaFila({ fila, nuevoBloque, editando, setEditando, guardarCampo }) {
+  const f = fila;
+  const key = (campo) => `${f.rowIndex}-${campo}`;
+
+  function CeldaTexto({ campo, mono, alinearDerecha }) {
+    const activo = editando === key(campo);
+    const [valor, setValor] = useState(f[campo]);
+    if (activo) {
+      return (
+        <input
+          autoFocus
+          className={`cell-input ${mono ? "mono" : ""}`}
+          style={alinearDerecha ? { textAlign: "right" } : undefined}
+          value={valor}
+          onChange={(e) => setValor(e.target.value)}
+          onBlur={() => guardarCampo(f, campo, valor)}
+          onKeyDown={(e) => e.key === "Enter" && guardarCampo(f, campo, valor)}
+        />
+      );
+    }
+    return (
+      <div className={`celda-editable ${mono ? "mono" : ""}`} style={alinearDerecha ? { textAlign: "right" } : undefined} onClick={() => setEditando(key(campo))}>
+        {campo === "importe" ? money(f[campo]) : (f[campo] || <span className="vacio">completar</span>)}
+      </div>
+    );
+  }
+
+  return (
+    <tr className={nuevoBloque ? "fila-nuevo-bloque" : ""}>
+      <td><CeldaTexto campo="nroAviso" mono /></td>
+      <td><CeldaTexto campo="comprobante" mono /></td>
+      <td><CeldaTexto campo="categoria" /></td>
+      <td className="estado-cell">
+        {editando === key("estado") ? (
+          <select
+            autoFocus
+            className="cell-input"
+            defaultValue={f.estado}
+            onChange={(e) => guardarCampo(f, "estado", e.target.value)}
+            onBlur={() => setEditando(null)}
+          >
+            <option value=""></option>
+            {ESTADOS.map((op) => <option key={op} value={op}>{op}</option>)}
+          </select>
+        ) : (
+          <button className="chip-btn" onClick={() => setEditando(key("estado"))}>
+            <span className={`chip ${claseEstado(f.estado)}`}>{f.estado || "—"}</span>
+            <ChevronDown size={12} />
+          </button>
+        )}
+      </td>
+      <td><CeldaTexto campo="fecha" /></td>
+      <td className="num"><CeldaTexto campo="importe" mono alinearDerecha /></td>
+      <td><CeldaTexto campo="notas" /></td>
+    </tr>
   );
 }

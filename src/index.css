@@ -722,3 +722,24 @@ a {
   font-weight: 700;
   color: #b0433f;
 }
+
+.fila-nuevo-bloque td {
+  border-top: 10px solid var(--paper);
+}
+
+.celda-editable {
+  padding: 4px 6px;
+  border-radius: 7px;
+  cursor: text;
+  min-height: 22px;
+}
+
+.celda-editable:hover {
+  background: var(--paper);
+}
+
+.vacio {
+  color: #b7c0c8;
+  font-style: italic;
+  font-size: 12px;
+}
