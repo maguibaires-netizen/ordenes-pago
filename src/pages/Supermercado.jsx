@@ -229,6 +229,42 @@ function PanelSubir({ slug, parser }) {
 
 // ---------------- Ver OP ----------------
 
+function parseFecha(str) {
+  const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(String(str || "").trim());
+  if (!m) return null;
+  const [, d, mo, y] = m;
+  return new Date(Number(y), Number(mo) - 1, Number(d));
+}
+
+// Agrupa las filas en bloques (cada bloque arranca en una fila "Orden de pago")
+// y los reordena cronológicamente por la fecha de esa fila ancla, sin importar
+// el orden físico en que se guardaron en el Sheet.
+function ordenarPorBloques(filas) {
+  const bloques = [];
+  let actual = null;
+  filas.forEach((f) => {
+    if (f.categoria === "Orden de pago" || !actual) {
+      actual = [];
+      bloques.push(actual);
+    }
+    actual.push(f);
+  });
+
+  const conFecha = bloques.map((bloque) => {
+    const ancla = bloque.find((f) => f.categoria === "Orden de pago") || bloque[0];
+    return { bloque, fecha: parseFecha(ancla.fecha) };
+  });
+
+  conFecha.sort((a, b) => {
+    if (!a.fecha && !b.fecha) return 0;
+    if (!a.fecha) return 1;
+    if (!b.fecha) return -1;
+    return a.fecha - b.fecha;
+  });
+
+  return conFecha.flatMap((c) => c.bloque);
+}
+
 function PanelVer({ slug }) {
   const [filas, setFilas] = useState(null);
   const [error, setError] = useState("");
@@ -259,7 +295,7 @@ function PanelVer({ slug }) {
     }
   }
 
-  const filtradas = (filas || []).filter((f) =>
+  const filtradas = ordenarPorBloques(filas || []).filter((f) =>
     `${f.comprobante} ${f.nroAviso}`.toLowerCase().includes(busqueda.toLowerCase())
   );
 
