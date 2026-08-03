@@ -269,6 +269,8 @@ function PanelVer({ slug }) {
   const [filas, setFilas] = useState(null);
   const [error, setError] = useState("");
   const [busqueda, setBusqueda] = useState("");
+  const [filtroCategoria, setFiltroCategoria] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState("");
   const [editando, setEditando] = useState(null); // `${rowIndex}-${campo}`
 
   const cargar = useCallback(async () => {
@@ -295,9 +297,15 @@ function PanelVer({ slug }) {
     }
   }
 
-  const filtradas = ordenarPorBloques(filas || []).filter((f) =>
-    `${f.comprobante} ${f.nroAviso}`.toLowerCase().includes(busqueda.toLowerCase())
-  );
+  const ordenadas = ordenarPorBloques(filas || []);
+  const categoriasUnicas = [...new Set(ordenadas.map((f) => f.categoria).filter(Boolean))].sort();
+
+  const filtradas = ordenadas.filter((f) => {
+    const coincideBusqueda = `${f.comprobante} ${f.nroAviso}`.toLowerCase().includes(busqueda.toLowerCase());
+    const coincideCategoria = !filtroCategoria || f.categoria === filtroCategoria;
+    const coincideEstado = !filtroEstado || f.estado === filtroEstado;
+    return coincideBusqueda && coincideCategoria && coincideEstado;
+  });
 
   if (error) return <div className="ledger empty-state">{error}</div>;
   if (!filas) return <p className="hint">Cargando...</p>;
@@ -309,6 +317,14 @@ function PanelVer({ slug }) {
           <Search size={14} />
           <input placeholder="Buscar por comprobante o nº aviso..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
         </div>
+        <select className="filtro-select" value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)}>
+          <option value="">Todas las categorías</option>
+          {categoriasUnicas.map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <select className="filtro-select" value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
+          <option value="">Todos los estados</option>
+          {ESTADOS.map((e) => <option key={e} value={e}>{e}</option>)}
+        </select>
       </div>
       <div className="ledger">
         <table>
