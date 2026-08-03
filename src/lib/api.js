@@ -16,6 +16,12 @@ export async function listarOrdenes(slug) {
   return data.filas;
 }
 
+export async function obtenerResumenPendientes() {
+  const res = await fetch("/api/ordenes/resumen");
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Error al leer el resumen");
+  return data.supermercados;
+}
 export async function actualizarCelda(slug, rowIndex, campo, valor) {
   const res = await fetch("/api/ordenes/actualizar-celda", {
     method: "POST",
