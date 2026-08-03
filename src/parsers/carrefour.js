@@ -59,7 +59,7 @@ function parsearRetenciones(filas) {
       comprobante: String(numero ?? ""),
       categoria: String(tipo ?? "").slice(0, 16),
       fecha: normalizarFecha(fechaVencimiento),
-      importe: Number(importeTotal ?? 0),
+      importe: -Math.abs(Number(importeTotal ?? 0)),
       estado: "",
       notas: "",
     };
@@ -119,7 +119,7 @@ export async function parsearOrdenDePagoCarrefour(archivos) {
         comprobante: "",
         categoria: "Orden de pago",
         fecha: resultado.ordenPago.fechaPago,
-        importe: Number(resultado.ordenPago.importe ?? 0),
+        importe: -Math.abs(Number(resultado.ordenPago.importe ?? 0)),
         estado: "",
         notas: `Vto. ${resultado.ordenPago.fechaVencimiento}`,
       }]

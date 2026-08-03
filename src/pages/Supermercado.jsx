@@ -131,6 +131,8 @@ function PanelSubir({ slug, parser }) {
     );
   }
 
+  const sumaTotal = (filas || []).reduce((acc, f) => acc + (Number(f.importe) || 0), 0);
+
   return (
     <div>
       {!filas && <Dropzone formatos={["XLSX"]} onFiles={manejarArchivos} />}
@@ -196,6 +198,19 @@ function PanelSubir({ slug, parser }) {
                   </tr>
                 ))}
               </tbody>
+              <tfoot>
+                <tr className="fila-total">
+                  <td colSpan={4} style={{ textAlign: "right" }}>Suma total (debería dar $0)</td>
+                  <td className="mono num">{money(sumaTotal)}</td>
+                  <td>
+                    {Math.abs(sumaTotal) < 0.01 ? (
+                      <span className="check-ok"><Check size={13} /> Cierra</span>
+                    ) : (
+                      <span className="check-mal"><X size={13} /> No cierra</span>
+                    )}
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           </div>
 

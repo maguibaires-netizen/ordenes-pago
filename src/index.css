@@ -698,3 +698,27 @@ a {
 .estado-cell select.cell-input {
   border: 1px solid var(--line);
 }
+
+.fila-total td {
+  border-top: 2px solid var(--line);
+  font-weight: 700;
+  padding-top: 12px;
+}
+
+.check-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #4f7743;
+}
+
+.check-mal {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #b0433f;
+}

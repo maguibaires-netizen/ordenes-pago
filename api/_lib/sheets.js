@@ -4,16 +4,22 @@ import { google } from "googleapis";
 // (cargadas en Vercel → Settings → Environment Variables). Nunca hardcodear
 // credenciales acá.
 function auth() {
-  const email = process.env.GOOGLE_CLIENT_EMAIL;
-  const key = (process.env.GOOGLE_PRIVATE_KEY || "").replace(/\\n/g, "\n");
+  const client_email = process.env.GOOGLE_CLIENT_EMAIL;
+  const private_key = (process.env.GOOGLE_PRIVATE_KEY || "")
+    .trim()
+    .replace(/^"(.*)"$/, "$1")
+    .replace(/\\n/g, "\n");
 
-  if (!email || !key) {
+  if (!client_email || !private_key) {
     throw new Error(
       "Faltan las variables de entorno GOOGLE_CLIENT_EMAIL / GOOGLE_PRIVATE_KEY en Vercel."
     );
   }
 
-  return new google.auth.JWT(email, null, key, ["https://www.googleapis.com/auth/spreadsheets"]);
+  return new google.auth.GoogleAuth({
+    credentials: { client_email, private_key },
+    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+  });
 }
 
 export function sheetsClient() {
