@@ -289,16 +289,22 @@ function PanelVer({ slug }) {
           </thead>
           <tbody>
             {filtradas.map((f, i) => {
-              const nuevoBloque = i > 0 && filtradas[i - 1].nroAviso !== f.nroAviso;
+              const nuevoBloque = i > 0 && f.categoria === "Orden de pago";
               return (
-                <CeldaFila
-                  key={f.rowIndex}
-                  fila={f}
-                  nuevoBloque={nuevoBloque}
-                  editando={editando}
-                  setEditando={setEditando}
-                  guardarCampo={guardarCampo}
-                />
+                <>
+                  {nuevoBloque && (
+                    <tr className="separador-op" key={`sep-${f.rowIndex}`}>
+                      <td colSpan={7}></td>
+                    </tr>
+                  )}
+                  <CeldaFila
+                    key={f.rowIndex}
+                    fila={f}
+                    editando={editando}
+                    setEditando={setEditando}
+                    guardarCampo={guardarCampo}
+                  />
+                </>
               );
             })}
           </tbody>
@@ -308,7 +314,7 @@ function PanelVer({ slug }) {
   );
 }
 
-function CeldaFila({ fila, nuevoBloque, editando, setEditando, guardarCampo }) {
+function CeldaFila({ fila, editando, setEditando, guardarCampo }) {
   const f = fila;
   const key = (campo) => `${f.rowIndex}-${campo}`;
 
@@ -336,7 +342,7 @@ function CeldaFila({ fila, nuevoBloque, editando, setEditando, guardarCampo }) {
   }
 
   return (
-    <tr className={nuevoBloque ? "fila-nuevo-bloque" : ""}>
+    <tr>
       <td><CeldaTexto campo="nroAviso" mono /></td>
       <td><CeldaTexto campo="comprobante" mono /></td>
       <td><CeldaTexto campo="categoria" /></td>

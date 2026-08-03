@@ -723,8 +723,11 @@ a {
   color: #b0433f;
 }
 
-.fila-nuevo-bloque td {
-  border-top: 10px solid var(--paper);
+.separador-op td {
+  padding: 0;
+  border-top: none;
+  background: var(--paper);
+  height: 16px;
 }
 
 .celda-editable {
