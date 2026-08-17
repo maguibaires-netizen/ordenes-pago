@@ -31,8 +31,10 @@ function nombreDe(slug) {
 }
 
 function exportarCsv(grupos) {
-  const rows = [["Supermercado", "Comprobante", "Estado", "Fecha", "Monto"]];
-  grupos.forEach((g) => g.items.forEach((i) => rows.push([nombreDe(g.slug), i.comprobante, i.estado, i.fecha, i.importe])));
+  const rows = [["Supermercado", "Comprobante", "Categoría", "Estado", "Fecha", "Monto", "Notas"]];
+  grupos.forEach((g) =>
+    g.items.forEach((i) => rows.push([nombreDe(g.slug), i.comprobante, i.categoria, i.estado, i.fecha, i.importe, i.notas]))
+  );
   const csv = rows.map((r) => r.join(";")).join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
