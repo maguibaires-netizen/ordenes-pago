@@ -74,6 +74,7 @@ export default function Supermercado() {
 function PanelSubir({ slug, parser }) {
   const [filas, setFilas] = useState(null);
   const [nroAviso, setNroAviso] = useState("");
+  const [fechaOp, setFechaOp] = useState("");
   const [archivosCargados, setArchivosCargados] = useState([]);
   const [sinIdentificar, setSinIdentificar] = useState([]);
   const [procesando, setProcesando] = useState(false);
@@ -119,7 +120,7 @@ function PanelSubir({ slug, parser }) {
     setGuardando(true);
     setError("");
     try {
-      await guardarOrdenes(slug, filas.map((f) => ({ ...f, nroAviso })));
+      await guardarOrdenes(slug, filas.map((f) => ({ ...f, nroAviso, fecha: f.fecha || fechaOp })));
       setGuardado(true);
     } catch (err) {
       setError(err.message);
@@ -169,9 +170,17 @@ function PanelSubir({ slug, parser }) {
             </p>
           )}
 
-          <div className="field" style={{ maxWidth: 220, marginBottom: 18 }}>
-            <label>Nº aviso (orden de pago)</label>
-            <input className="mono" value={nroAviso} onChange={(e) => setNroAviso(e.target.value)} placeholder="Ej: 0084073974" />
+          <div style={{ display: "flex", gap: 16, marginBottom: 18 }}>
+            <div className="field" style={{ maxWidth: 220 }}>
+              <label>Nº aviso (orden de pago)</label>
+              <input className="mono" value={nroAviso} onChange={(e) => setNroAviso(e.target.value)} placeholder="Ej: 0084073974" />
+            </div>
+            {filas.some((f) => !f.fecha) && (
+              <div className="field" style={{ maxWidth: 220 }}>
+                <label>Fecha (el archivo no la trae)</label>
+                <input value={fechaOp} onChange={(e) => setFechaOp(e.target.value)} placeholder="dd/mm/aaaa" />
+              </div>
+            )}
           </div>
 
           <div className="ledger" style={{ overflowX: "auto" }}>

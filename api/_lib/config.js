@@ -13,6 +13,10 @@ export const SHEETS = {
     sheetId: "1KQ3Kzxd8l6VNHv0TbOH5mPkcvlkP226rm1lRpa6F36k",
     pestaña: "Cargadas web",
   },
+  coto: {
+    sheetId: "122qV26ujU-eROzw_TRlsuxVFZMxjh02k4xYo_BRYE-0",
+    pestaña: "Cargadas web",
+  },
 };
 
 // Columnas en el orden exacto en que están en la fila 1 de "Cargadas web"
