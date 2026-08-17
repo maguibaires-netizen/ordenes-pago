@@ -113,6 +113,7 @@ export default function PendientesPanel() {
                                 <th>Estado</th>
                                 <th>Fecha</th>
                                 <th style={{ textAlign: "right" }}>Monto</th>
+                                <th>Notas</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -125,6 +126,7 @@ export default function PendientesPanel() {
                                   </td>
                                   <td>{i.fecha}</td>
                                   <td className="num">{money(i.importe)}</td>
+                                  <td>{i.notas}</td>
                                 </tr>
                               ))}
                             </tbody>
