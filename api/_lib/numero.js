@@ -1,17 +1,29 @@
-// Google Sheets devuelve los importes como texto ya formateado según el
-// idioma de la planilla (ej: "-11.732.431,42"), no como número plano.
-// Esto los convierte a un número de JS de forma confiable.
+// Google Sheets devuelve los importes ya formateados como texto según el
+// formato de la celda (puede venir como "-$12,503,231.60" o como
+// "-11.732.431,42" según el caso) — nunca como número plano. Esto los
+// convierte a un número de JS de forma confiable sin asumir un formato fijo.
 export function numeroDesdeCelda(valor) {
   if (typeof valor === "number") return valor;
   if (valor === null || valor === undefined || valor === "") return 0;
 
-  const texto = String(valor).trim();
+  // saca símbolo de moneda, espacios, etc. — deja solo dígitos, . , y -
+  let texto = String(valor).trim().replace(/[^0-9.,-]/g, "");
+  if (!texto) return 0;
 
-  // Formato es-AR: puntos de miles + coma decimal (ej: 1.234.567,89 o -11.732.431,42)
-  if (/^-?\d{1,3}(\.\d{3})*(,\d+)?$/.test(texto)) {
-    return Number(texto.replace(/\./g, "").replace(",", "."));
+  const ultimaComa = texto.lastIndexOf(",");
+  const ultimoPunto = texto.lastIndexOf(".");
+
+  let limpio;
+  if (ultimaComa > ultimoPunto) {
+    // la coma es el separador decimal (formato es-AR: 11.732.431,42)
+    limpio = texto.replace(/\./g, "").replace(",", ".");
+  } else if (ultimoPunto > ultimaComa) {
+    // el punto es el separador decimal (formato en-US: 12,503,231.60)
+    limpio = texto.replace(/,/g, "");
+  } else {
+    limpio = texto;
   }
 
-  const directo = Number(texto);
-  return Number.isNaN(directo) ? 0 : directo;
+  const numero = Number(limpio);
+  return Number.isNaN(numero) ? 0 : numero;
 }
