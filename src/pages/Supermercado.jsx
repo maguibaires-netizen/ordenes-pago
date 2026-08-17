@@ -229,6 +229,13 @@ function PanelSubir({ slug, parser }) {
 
 // ---------------- Ver OP ----------------
 
+function parseFecha(str) {
+  const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(String(str || "").trim());
+  if (!m) return null;
+  const [, d, mo, y] = m;
+  return new Date(Number(y), Number(mo) - 1, Number(d));
+}
+
 function agruparEnBloques(filas) {
   const bloques = [];
   let actual = null;
