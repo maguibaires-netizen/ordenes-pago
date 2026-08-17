@@ -229,17 +229,7 @@ function PanelSubir({ slug, parser }) {
 
 // ---------------- Ver OP ----------------
 
-function parseFecha(str) {
-  const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(String(str || "").trim());
-  if (!m) return null;
-  const [, d, mo, y] = m;
-  return new Date(Number(y), Number(mo) - 1, Number(d));
-}
-
-// Agrupa las filas en bloques (cada bloque arranca en una fila "Orden de pago")
-// y los reordena cronológicamente por la fecha de esa fila ancla, sin importar
-// el orden físico en que se guardaron en el Sheet.
-function ordenarPorBloques(filas) {
+function agruparEnBloques(filas) {
   const bloques = [];
   let actual = null;
   filas.forEach((f) => {
@@ -249,20 +239,25 @@ function ordenarPorBloques(filas) {
     }
     actual.push(f);
   });
+  return bloques;
+}
 
-  const conFecha = bloques.map((bloque) => {
+function ordenarBloques(bloques) {
+  const conAncla = bloques.map((bloque) => {
     const ancla = bloque.find((f) => f.categoria === "Orden de pago") || bloque[0];
-    return { bloque, fecha: parseFecha(ancla.fecha) };
+    return { bloque, ancla, fecha: parseFecha(ancla.fecha) };
   });
-
-  conFecha.sort((a, b) => {
+  conAncla.sort((a, b) => {
     if (!a.fecha && !b.fecha) return 0;
     if (!a.fecha) return 1;
     if (!b.fecha) return -1;
     return a.fecha - b.fecha;
   });
+  return conAncla;
+}
 
-  return conFecha.flatMap((c) => c.bloque);
+function ordenarPorBloques(filas) {
+  return ordenarBloques(agruparEnBloques(filas)).flatMap((c) => c.bloque);
 }
 
 function PanelVer({ slug }) {
@@ -272,6 +267,7 @@ function PanelVer({ slug }) {
   const [filtroCategoria, setFiltroCategoria] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("");
   const [editando, setEditando] = useState(null); // `${rowIndex}-${campo}`
+  const [abiertos, setAbiertos] = useState(() => new Set());
 
   const cargar = useCallback(async () => {
     setError("");
@@ -297,8 +293,17 @@ function PanelVer({ slug }) {
     }
   }
 
+  function toggleBloque(rowIndex) {
+    setAbiertos((prev) => {
+      const next = new Set(prev);
+      next.has(rowIndex) ? next.delete(rowIndex) : next.add(rowIndex);
+      return next;
+    });
+  }
+
   const ordenadas = ordenarPorBloques(filas || []);
   const categoriasUnicas = [...new Set(ordenadas.map((f) => f.categoria).filter(Boolean))].sort();
+  const hayFiltroActivo = Boolean(busqueda || filtroCategoria || filtroEstado);
 
   const filtradas = ordenadas.filter((f) => {
     const coincideBusqueda = `${f.comprobante} ${f.nroAviso}`.toLowerCase().includes(busqueda.toLowerCase());
@@ -306,6 +311,8 @@ function PanelVer({ slug }) {
     const coincideEstado = !filtroEstado || f.estado === filtroEstado;
     return coincideBusqueda && coincideCategoria && coincideEstado;
   });
+
+  const bloques = ordenarBloques(agruparEnBloques(filas || []));
 
   if (error) return <div className="ledger empty-state">{error}</div>;
   if (!filas) return <p className="hint">Cargando...</p>;
@@ -340,25 +347,60 @@ function PanelVer({ slug }) {
             </tr>
           </thead>
           <tbody>
-            {filtradas.map((f, i) => {
-              const nuevoBloque = i > 0 && f.categoria === "Orden de pago";
-              return (
-                <>
-                  {nuevoBloque && (
-                    <tr className="separador-op" key={`sep-${f.rowIndex}`}>
-                      <td colSpan={7}></td>
-                    </tr>
-                  )}
-                  <CeldaFila
-                    key={f.rowIndex}
-                    fila={f}
-                    editando={editando}
-                    setEditando={setEditando}
-                    guardarCampo={guardarCampo}
-                  />
-                </>
-              );
-            })}
+            {hayFiltroActivo
+              ? filtradas.map((f, i) => {
+                  const nuevoBloque = i > 0 && f.categoria === "Orden de pago";
+                  return (
+                    <>
+                      {nuevoBloque && (
+                        <tr className="separador-op" key={`sep-${f.rowIndex}`}>
+                          <td colSpan={7}></td>
+                        </tr>
+                      )}
+                      <CeldaFila key={f.rowIndex} fila={f} editando={editando} setEditando={setEditando} guardarCampo={guardarCampo} />
+                    </>
+                  );
+                })
+              : bloques.map(({ bloque, ancla }, i) => {
+                  const abierto = abiertos.has(ancla.rowIndex);
+                  const resto = bloque.filter((f) => f.rowIndex !== ancla.rowIndex);
+                  return (
+                    <>
+                      {i > 0 && (
+                        <tr className="separador-op" key={`sep-${ancla.rowIndex}`}>
+                          <td colSpan={7}></td>
+                        </tr>
+                      )}
+                      <CeldaFila
+                        key={ancla.rowIndex}
+                        fila={ancla}
+                        editando={editando}
+                        setEditando={setEditando}
+                        guardarCampo={guardarCampo}
+                        toggle={
+                          resto.length > 0 && (
+                            <button className="chev-btn" onClick={() => toggleBloque(ancla.rowIndex)}>
+                              <ChevronDown size={14} className={abierto ? "chev-open" : ""} />
+                            </button>
+                          )
+                        }
+                      />
+                      {abierto && resto.length > 0 && (
+                        <tr className="ledger-detail-row" key={`det-${ancla.rowIndex}`}>
+                          <td colSpan={7}>
+                            <table className="sub-ledger-completo">
+                              <tbody>
+                                {resto.map((f) => (
+                                  <CeldaFila key={f.rowIndex} fila={f} editando={editando} setEditando={setEditando} guardarCampo={guardarCampo} />
+                                ))}
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                      )}
+                    </>
+                  );
+                })}
           </tbody>
         </table>
       </div>
@@ -366,7 +408,7 @@ function PanelVer({ slug }) {
   );
 }
 
-function CeldaFila({ fila, editando, setEditando, guardarCampo }) {
+function CeldaFila({ fila, editando, setEditando, guardarCampo, toggle }) {
   const f = fila;
   const key = (campo) => `${f.rowIndex}-${campo}`;
 
@@ -395,7 +437,12 @@ function CeldaFila({ fila, editando, setEditando, guardarCampo }) {
 
   return (
     <tr>
-      <td><CeldaTexto campo="nroAviso" mono /></td>
+      <td>
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          {toggle}
+          <div style={{ flex: 1 }}><CeldaTexto campo="nroAviso" mono /></div>
+        </div>
+      </td>
       <td><CeldaTexto campo="comprobante" mono /></td>
       <td><CeldaTexto campo="categoria" /></td>
       <td className="estado-cell">
