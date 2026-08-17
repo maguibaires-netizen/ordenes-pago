@@ -5,6 +5,14 @@ export const SHEETS = {
     sheetId: "1htBw2WgQlxDT_PrbKBcKrWUkgzAQzvF_WOLnh1xbvvk",
     pestaña: "Cargadas web",
   },
+  cencosud: {
+    sheetId: "1vQaUIRo2gixkltlQNeUhWNu9HDH7axRNLwcPLurNHHU",
+    pestaña: "Cargadas web",
+  },
+  makro: {
+    sheetId: "1KQ3Kzxd8l6VNHv0TbOH5mPkcvlkP226rm1lRpa6F36k",
+    pestaña: "Cargadas web",
+  },
 };
 
 // Columnas en el orden exacto en que están en la fila 1 de "Cargadas web"

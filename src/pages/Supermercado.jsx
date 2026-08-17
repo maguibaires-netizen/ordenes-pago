@@ -89,11 +89,12 @@ function PanelSubir({ slug, parser }) {
       const archivos = await Promise.all(
         files.map(async (f) => ({ nombre: f.name, arrayBuffer: await f.arrayBuffer() }))
       );
-      const { filas: filasParseadas, sinIdentificar: raro } = await parser(archivos);
+      const { filas: filasParseadas, sinIdentificar: raro, nroAvisoDetectado } = await parser(archivos);
       setFilas(filasParseadas);
       setArchivosCargados(files.map((f) => f.name));
       setSinIdentificar(raro);
       setGuardado(false);
+      if (nroAvisoDetectado) setNroAviso(nroAvisoDetectado);
     } catch (err) {
       console.error(err);
       setError("No se pudieron leer los archivos. Revisá que sean los correctos.");
