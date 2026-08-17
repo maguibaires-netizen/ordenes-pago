@@ -1,5 +1,6 @@
 import { sheetsClient } from "../_lib/sheets.js";
 import { SHEETS } from "../_lib/config.js";
+import { numeroDesdeCelda } from "../_lib/numero.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -28,7 +29,7 @@ export default async function handler(req, res) {
       categoria: fila[2] || "",
       estado: fila[3] || "",
       fecha: fila[4] || "",
-      importe: fila[5] || "",
+      importe: numeroDesdeCelda(fila[5]),
       notas: fila[6] || "",
     }));
 

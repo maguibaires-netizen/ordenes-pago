@@ -1,5 +1,6 @@
 import { sheetsClient } from "../_lib/sheets.js";
 import { SHEETS } from "../_lib/config.js";
+import { numeroDesdeCelda } from "../_lib/numero.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -26,11 +27,11 @@ export default async function handler(req, res) {
               categoria: fila[2] || "",
               estado: fila[3] || "",
               fecha: fila[4] || "",
-              importe: Number(fila[5] || 0),
+              importe: numeroDesdeCelda(fila[5]),
               notas: fila[6] || "",
             }))
-            // "pendiente" = todo lo que todavía no está Conciliada
-            .filter((f) => f.estado !== "Conciliada");
+            // "pendiente de resolver" = únicamente Pendiente o Enviado a compras/cpag
+            .filter((f) => f.estado === "Pendiente" || f.estado === "Enviado a compras/cpag");
 
           return {
             slug,
