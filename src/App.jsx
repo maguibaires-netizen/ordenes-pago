@@ -1,8 +1,14 @@
 import { Routes, Route } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
+import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Supermercado from "./pages/Supermercado";
 
 export default function App() {
+  const { rol } = useAuth();
+
+  if (!rol) return <Login />;
+
   return (
     <Routes>
       <Route path="/" element={<Home />} />

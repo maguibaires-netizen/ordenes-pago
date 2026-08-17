@@ -1,5 +1,6 @@
 import { sheetsClient } from "../_lib/sheets.js";
 import { SHEETS } from "../_lib/config.js";
+import { requiereAdmin } from "../_lib/auth.js";
 
 const COLUMNA = {
   nroAviso: "A",
@@ -14,6 +15,9 @@ const COLUMNA = {
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Método no permitido" });
+  }
+  if (!requiereAdmin(req)) {
+    return res.status(403).json({ error: "No tenés permiso para editar." });
   }
 
   const { slug, rowIndex, campo, valor } = req.body || {};

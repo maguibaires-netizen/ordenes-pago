@@ -1,7 +1,20 @@
+function tokenActual() {
+  try {
+    const sesion = JSON.parse(localStorage.getItem("bo-sesion") || "null");
+    return sesion?.token || "";
+  } catch {
+    return "";
+  }
+}
+
+function headersConAuth() {
+  return { "Content-Type": "application/json", "x-auth-token": tokenActual() };
+}
+
 export async function guardarOrdenes(slug, filas) {
   const res = await fetch("/api/ordenes/append", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: headersConAuth(),
     body: JSON.stringify({ slug, filas }),
   });
   const data = await res.json();
@@ -22,10 +35,11 @@ export async function obtenerResumenPendientes() {
   if (!res.ok) throw new Error(data.error || "Error al leer el resumen");
   return data.supermercados;
 }
+
 export async function actualizarCelda(slug, rowIndex, campo, valor) {
   const res = await fetch("/api/ordenes/actualizar-celda", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: headersConAuth(),
     body: JSON.stringify({ slug, rowIndex, campo, valor }),
   });
   const data = await res.json();

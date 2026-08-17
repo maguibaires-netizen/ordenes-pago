@@ -797,6 +797,124 @@ a {
   border-top: none;
 }
 
+/* ---------- sesión / topbar ---------- */
+
+.sesion-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+}
+
+.rol-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--slate);
+  background: var(--white);
+  padding: 6px 10px;
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+}
+
+.salir-btn {
+  background: var(--white);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--slate);
+  box-shadow: var(--shadow-sm);
+}
+
+.salir-btn:hover {
+  color: #b0433f;
+}
+
+/* ---------- login ---------- */
+
+.login-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper);
+  padding: 24px;
+}
+
+.login-card {
+  background: var(--white);
+  border-radius: 20px;
+  box-shadow: var(--shadow-md);
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+}
+
+.login-logo {
+  height: 56px;
+  width: auto;
+  margin-bottom: 14px;
+}
+
+.login-ic {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.login-card h1 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.login-card p {
+  font-size: 13px;
+  color: var(--slate);
+  margin: 0 0 14px;
+}
+
+.login-card input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.login-card input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.login-card .btn-primary {
+  width: 100%;
+  justify-content: center;
+}
+
+.login-card .error-text {
+  margin: -6px 0 10px;
+}
+
 .filtro-select {
   background: var(--white);
   border: none;

@@ -7,6 +7,7 @@ import { supermercados } from "../data/supermercados";
 import { logoDe } from "../data/logos";
 import { PARSERS, ESTADOS } from "../parsers/registro";
 import { guardarOrdenes, listarOrdenes, actualizarCelda } from "../lib/api";
+import { useAuth } from "../context/AuthContext";
 
 function claseEstado(estado) {
   const mapa = {
@@ -31,8 +32,9 @@ export default function Supermercado() {
   const logo = logoDe(slug);
   const parser = PARSERS[slug];
   const location = useLocation();
+  const { esAdmin } = useAuth();
 
-  const [tab, setTab] = useState(location.pathname.endsWith("/ver") ? "ver" : "subir");
+  const [tab, setTab] = useState(esAdmin && !location.pathname.endsWith("/ver") ? "subir" : "ver");
 
   return (
     <div className="app-shell">
@@ -46,20 +48,22 @@ export default function Supermercado() {
       </div>
 
       <div className="tabs">
-        <button className={tab === "subir" ? "active" : ""} onClick={() => setTab("subir")}>
-          <Upload size={14} strokeWidth={1.8} />
-          Subir OP
-        </button>
+        {esAdmin && (
+          <button className={tab === "subir" ? "active" : ""} onClick={() => setTab("subir")}>
+            <Upload size={14} strokeWidth={1.8} />
+            Subir OP
+          </button>
+        )}
         <button className={tab === "ver" ? "active" : ""} onClick={() => setTab("ver")}>
           <Eye size={14} strokeWidth={1.8} />
           Ver OP cargadas
         </button>
       </div>
 
-      {tab === "subir" ? (
+      {tab === "subir" && esAdmin ? (
         <PanelSubir slug={slug} parser={parser} />
       ) : (
-        <PanelVer slug={slug} />
+        <PanelVer slug={slug} editable={esAdmin} />
       )}
     </div>
   );
@@ -267,7 +271,7 @@ function ordenarPorBloques(filas) {
   return ordenarBloques(agruparEnBloques(filas)).flatMap((c) => c.bloque);
 }
 
-function PanelVer({ slug }) {
+function PanelVer({ slug, editable }) {
   const [filas, setFilas] = useState(null);
   const [error, setError] = useState("");
   const [busqueda, setBusqueda] = useState("");
@@ -364,7 +368,7 @@ function PanelVer({ slug }) {
                           <td colSpan={7}></td>
                         </tr>
                       )}
-                      <CeldaFila key={f.rowIndex} fila={f} editando={editando} setEditando={setEditando} guardarCampo={guardarCampo} />
+                      <CeldaFila key={f.rowIndex} fila={f} editando={editando} setEditando={setEditando} guardarCampo={guardarCampo} editable={editable} />
                     </>
                   );
                 })
@@ -384,6 +388,7 @@ function PanelVer({ slug }) {
                         editando={editando}
                         setEditando={setEditando}
                         guardarCampo={guardarCampo}
+                        editable={editable}
                         toggle={
                           resto.length > 0 && (
                             <button className="chev-btn" onClick={() => toggleBloque(ancla.rowIndex)}>
@@ -398,7 +403,7 @@ function PanelVer({ slug }) {
                             <table className="sub-ledger-completo">
                               <tbody>
                                 {resto.map((f) => (
-                                  <CeldaFila key={f.rowIndex} fila={f} editando={editando} setEditando={setEditando} guardarCampo={guardarCampo} />
+                                  <CeldaFila key={f.rowIndex} fila={f} editando={editando} setEditando={setEditando} guardarCampo={guardarCampo} editable={editable} />
                                 ))}
                               </tbody>
                             </table>
@@ -415,12 +420,12 @@ function PanelVer({ slug }) {
   );
 }
 
-function CeldaFila({ fila, editando, setEditando, guardarCampo, toggle }) {
+function CeldaFila({ fila, editando, setEditando, guardarCampo, toggle, editable = true }) {
   const f = fila;
   const key = (campo) => `${f.rowIndex}-${campo}`;
 
   function CeldaTexto({ campo, mono, alinearDerecha }) {
-    const activo = editando === key(campo);
+    const activo = editable && editando === key(campo);
     const [valor, setValor] = useState(f[campo]);
     if (activo) {
       return (
@@ -436,8 +441,12 @@ function CeldaFila({ fila, editando, setEditando, guardarCampo, toggle }) {
       );
     }
     return (
-      <div className={`celda-editable ${mono ? "mono" : ""}`} style={alinearDerecha ? { textAlign: "right" } : undefined} onClick={() => setEditando(key(campo))}>
-        {campo === "importe" ? money(f[campo]) : (f[campo] || <span className="vacio">completar</span>)}
+      <div
+        className={`${editable ? "celda-editable" : ""} ${mono ? "mono" : ""}`}
+        style={alinearDerecha ? { textAlign: "right" } : undefined}
+        onClick={editable ? () => setEditando(key(campo)) : undefined}
+      >
+        {campo === "importe" ? money(f[campo]) : (f[campo] || (editable && <span className="vacio">completar</span>))}
       </div>
     );
   }
@@ -453,7 +462,7 @@ function CeldaFila({ fila, editando, setEditando, guardarCampo, toggle }) {
       <td><CeldaTexto campo="comprobante" mono /></td>
       <td><CeldaTexto campo="categoria" /></td>
       <td className="estado-cell">
-        {editando === key("estado") ? (
+        {editable && editando === key("estado") ? (
           <select
             autoFocus
             className="cell-input"
@@ -464,11 +473,13 @@ function CeldaFila({ fila, editando, setEditando, guardarCampo, toggle }) {
             <option value=""></option>
             {ESTADOS.map((op) => <option key={op} value={op}>{op}</option>)}
           </select>
-        ) : (
+        ) : editable ? (
           <button className="chip-btn" onClick={() => setEditando(key("estado"))}>
             <span className={`chip ${claseEstado(f.estado)}`}>{f.estado || "—"}</span>
             <ChevronDown size={12} />
           </button>
+        ) : (
+          <span className={`chip ${claseEstado(f.estado)}`}>{f.estado || "—"}</span>
         )}
       </td>
       <td><CeldaTexto campo="fecha" /></td>

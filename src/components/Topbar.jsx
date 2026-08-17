@@ -1,5 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
+import { LogOut } from "lucide-react";
 import { logoBaires } from "../data/logos";
+import { useAuth } from "../context/AuthContext";
 
 const links = [
   { to: "/acuerdos", label: "Acuerdos" },
@@ -9,6 +11,8 @@ const links = [
 
 export default function Topbar() {
   const location = useLocation();
+  const { rol, salir } = useAuth();
+
   return (
     <div className="topbar">
       <Link to="/" className="wordmark">
@@ -31,6 +35,12 @@ export default function Topbar() {
           </Link>
         ))}
       </nav>
+      <div className="sesion-info">
+        <span className="rol-badge">{rol === "admin" ? "Admin" : "Vendedor"}</span>
+        <button className="salir-btn" onClick={salir} title="Cerrar sesión">
+          <LogOut size={15} strokeWidth={1.8} />
+        </button>
+      </div>
     </div>
   );
 }
