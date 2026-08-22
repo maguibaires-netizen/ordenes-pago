@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { Download, ChevronDown } from "lucide-react";
 import { supermercados } from "../data/supermercados";
-import { obtenerResumenPendientes } from "../lib/api";
+import { obtenerResumenPendientes, actualizarCelda } from "../lib/api";
+import { useAuth } from "../context/AuthContext";
+
+const ESTADOS = ["Pendiente", "Generada", "Conciliada", "CC incompleta", "Enviado a compras/cpag"];
 
 const etiquetas = {
   Pendiente: "Pendiente",
@@ -31,9 +34,9 @@ function nombreDe(slug) {
 }
 
 function exportarCsv(grupos) {
-  const rows = [["Supermercado", "Comprobante", "Categoría", "Estado", "Fecha", "Monto", "Notas"]];
+  const rows = [["Supermercado", "Nº aviso", "Comprobante", "Categoría", "Estado", "Fecha", "Monto", "Notas"]];
   grupos.forEach((g) =>
-    g.items.forEach((i) => rows.push([nombreDe(g.slug), i.comprobante, i.categoria, i.estado, i.fecha, i.importe, i.notas]))
+    g.items.forEach((i) => rows.push([nombreDe(g.slug), i.nroAviso, i.comprobante, i.categoria, i.estado, i.fecha, i.importe, i.notas]))
   );
   const csv = rows.map((r) => r.join(";")).join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -46,9 +49,11 @@ function exportarCsv(grupos) {
 }
 
 export default function PendientesPanel() {
+  const { esAdmin } = useAuth();
   const [grupos, setGrupos] = useState(null);
   const [error, setError] = useState("");
   const [abiertos, setAbiertos] = useState(() => new Set());
+  const [editando, setEditando] = useState(null); // `${slug}-${rowIndex}`
 
   useEffect(() => {
     obtenerResumenPendientes()
@@ -62,6 +67,28 @@ export default function PendientesPanel() {
       next.has(slug) ? next.delete(slug) : next.add(slug);
       return next;
     });
+  }
+
+  async function cambiarEstado(slug, item, nuevoEstado) {
+    setEditando(null);
+    // se resolvió (ya no es Pendiente ni Enviado a compras/cpag) -> desaparece de la lista
+    const sigueSiendoPendiente = nuevoEstado === "Pendiente" || nuevoEstado === "Enviado a compras/cpag";
+    setGrupos((prev) =>
+      prev
+        .map((g) => {
+          if (g.slug !== slug) return g;
+          const items = sigueSiendoPendiente
+            ? g.items.map((i) => (i.rowIndex === item.rowIndex ? { ...i, estado: nuevoEstado } : i))
+            : g.items.filter((i) => i.rowIndex !== item.rowIndex);
+          return { ...g, items, cantidad: items.length, monto: items.reduce((acc, i) => acc + i.importe, 0) };
+        })
+        .filter((g) => g.cantidad > 0)
+    );
+    try {
+      await actualizarCelda(slug, item.rowIndex, "estado", nuevoEstado);
+    } catch (err) {
+      setError(err.message);
+    }
   }
 
   return (
@@ -110,6 +137,7 @@ export default function PendientesPanel() {
                           <table className="sub-ledger">
                             <thead>
                               <tr>
+                                <th>Nº de OP</th>
                                 <th>Comprobante</th>
                                 <th>Categoría</th>
                                 <th>Estado</th>
@@ -119,18 +147,39 @@ export default function PendientesPanel() {
                               </tr>
                             </thead>
                             <tbody>
-                              {g.items.map((i, idx) => (
-                                <tr key={idx}>
-                                  <td>{i.comprobante}</td>
-                                  <td>{i.categoria}</td>
-                                  <td>
-                                    <span className={`chip ${claseEstado(i.estado)}`}>{etiquetas[i.estado] || i.estado || "—"}</span>
-                                  </td>
-                                  <td>{i.fecha}</td>
-                                  <td className="num">{money(i.importe)}</td>
-                                  <td>{i.notas}</td>
-                                </tr>
-                              ))}
+                              {g.items.map((i) => {
+                                const key = `${g.slug}-${i.rowIndex}`;
+                                return (
+                                  <tr key={i.rowIndex}>
+                                    <td className="mono">{i.nroAviso}</td>
+                                    <td>{i.comprobante}</td>
+                                    <td>{i.categoria}</td>
+                                    <td className="estado-cell">
+                                      {editando === key ? (
+                                        <select
+                                          autoFocus
+                                          className="cell-input"
+                                          defaultValue={i.estado}
+                                          onChange={(e) => cambiarEstado(g.slug, i, e.target.value)}
+                                          onBlur={() => setEditando(null)}
+                                        >
+                                          {ESTADOS.map((op) => <option key={op} value={op}>{op}</option>)}
+                                        </select>
+                                      ) : esAdmin ? (
+                                        <button className="chip-btn" onClick={() => setEditando(key)}>
+                                          <span className={`chip ${claseEstado(i.estado)}`}>{etiquetas[i.estado] || i.estado || "—"}</span>
+                                          <ChevronDown size={12} />
+                                        </button>
+                                      ) : (
+                                        <span className={`chip ${claseEstado(i.estado)}`}>{etiquetas[i.estado] || i.estado || "—"}</span>
+                                      )}
+                                    </td>
+                                    <td>{i.fecha}</td>
+                                    <td className="num">{money(i.importe)}</td>
+                                    <td>{i.notas}</td>
+                                  </tr>
+                                );
+                              })}
                             </tbody>
                           </table>
                         </td>

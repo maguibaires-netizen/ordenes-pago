@@ -771,6 +771,11 @@ a {
   transform: rotate(180deg);
 }
 
+.borrar-btn:hover {
+  background: #fbecec;
+  color: #b0433f;
+}
+
 .ledger-detail-row td {
   padding: 0 0 10px;
   background: var(--paper);

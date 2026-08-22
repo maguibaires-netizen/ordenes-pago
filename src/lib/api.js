@@ -36,6 +36,16 @@ export async function obtenerResumenPendientes() {
   return data.supermercados;
 }
 
+export async function eliminarBloque(slug, filas) {
+  const res = await fetch("/api/ordenes/eliminar-bloque", {
+    method: "POST",
+    headers: headersConAuth(),
+    body: JSON.stringify({ slug, filas }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Error al borrar");
+  return data;
+}
 export async function actualizarCelda(slug, rowIndex, campo, valor) {
   const res = await fetch("/api/ordenes/actualizar-celda", {
     method: "POST",

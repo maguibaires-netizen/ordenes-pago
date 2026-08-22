@@ -21,7 +21,8 @@ export default async function handler(req, res) {
           });
 
           const items = (data.values || [])
-            .map((fila) => ({
+            .map((fila, i) => ({
+              rowIndex: i + 2,
               nroAviso: fila[0] || "",
               comprobante: fila[1] || "",
               categoria: fila[2] || "",

@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
-import { Upload, Eye, Search, X, Check, FileSpreadsheet, ChevronDown } from "lucide-react";
+import { Upload, Eye, Search, X, Check, FileSpreadsheet, ChevronDown, Trash2 } from "lucide-react";
 import Topbar from "../components/Topbar";
 import Dropzone from "../components/Dropzone";
 import { supermercados } from "../data/supermercados";
 import { logoDe } from "../data/logos";
 import { PARSERS, ESTADOS } from "../parsers/registro";
-import { guardarOrdenes, listarOrdenes, actualizarCelda } from "../lib/api";
+import { guardarOrdenes, listarOrdenes, actualizarCelda, eliminarBloque } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 
 function claseEstado(estado) {
@@ -322,6 +322,18 @@ function PanelVer({ slug, editable }) {
     });
   }
 
+  async function borrarBloque(ancla, resto) {
+    const nombre = ancla.nroAviso || "(sin número)";
+    if (!window.confirm(`¿Borrar la orden de pago ${nombre} completa? Esta acción no se puede deshacer.`)) return;
+    const rowIndexes = [ancla.rowIndex, ...resto.map((f) => f.rowIndex)];
+    try {
+      await eliminarBloque(slug, rowIndexes);
+      setFilas((prev) => prev.filter((f) => !rowIndexes.includes(f.rowIndex)));
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   const ordenadas = ordenarPorBloques(filas || []);
   const categoriasUnicas = [...new Set(ordenadas.map((f) => f.categoria).filter(Boolean))].sort();
   const hayFiltroActivo = Boolean(busqueda || filtroCategoria || filtroEstado);
@@ -400,11 +412,18 @@ function PanelVer({ slug, editable }) {
                         guardarCampo={guardarCampo}
                         editable={editable}
                         toggle={
-                          resto.length > 0 && (
-                            <button className="chev-btn" onClick={() => toggleBloque(ancla.rowIndex)}>
-                              <ChevronDown size={14} className={abierto ? "chev-open" : ""} />
-                            </button>
-                          )
+                          <>
+                            {resto.length > 0 && (
+                              <button className="chev-btn" onClick={() => toggleBloque(ancla.rowIndex)}>
+                                <ChevronDown size={14} className={abierto ? "chev-open" : ""} />
+                              </button>
+                            )}
+                            {editable && (
+                              <button className="chev-btn borrar-btn" title="Borrar esta orden de pago" onClick={() => borrarBloque(ancla, resto)}>
+                                <Trash2 size={13} />
+                              </button>
+                            )}
+                          </>
                         }
                       />
                       {abierto && resto.length > 0 && (
