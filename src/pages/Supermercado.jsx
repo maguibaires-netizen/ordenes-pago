@@ -141,7 +141,7 @@ function PanelSubir({ slug, parser }) {
 
   return (
     <div>
-      {!filas && <Dropzone formatos={["XLSX"]} onFiles={manejarArchivos} />}
+      {!filas && <Dropzone formatos={slug === "coto" ? ["CSV"] : slug === "dorinka" ? ["PDF"] : ["XLSX"]} onFiles={manejarArchivos} />}
       {procesando && <p className="hint" style={{ marginTop: 12 }}>Leyendo archivos...</p>}
       {error && <p className="error-text">{error}</p>}
 

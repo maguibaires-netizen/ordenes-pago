@@ -17,6 +17,10 @@ export const SHEETS = {
     sheetId: "122qV26ujU-eROzw_TRlsuxVFZMxjh02k4xYo_BRYE-0",
     pestaña: "Cargadas web",
   },
+  dorinka: {
+    sheetId: "1JaKueacZWDJ5_AS9Hpkkwbr6pcSygpZfzcCMDVyNczo",
+    pestaña: "Cargadas web",
+  },
 };
 
 // Columnas en el orden exacto en que están en la fila 1 de "Cargadas web"
