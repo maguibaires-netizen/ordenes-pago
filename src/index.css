@@ -233,6 +233,7 @@ a {
   border-radius: 10px;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
+  table-layout: auto;
 }
 
 .sub-ledger th {
@@ -242,14 +243,17 @@ a {
   color: var(--slate);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  padding: 9px 14px;
+  padding: 10px 16px;
   border-bottom: 1px solid var(--line-soft);
+  white-space: nowrap;
 }
 
 .sub-ledger td {
-  padding: 10px 14px;
+  padding: 12px 16px;
   font-size: 12.5px;
   border-top: 1px solid var(--line-soft);
+  line-height: 1.5;
+  vertical-align: top;
 }
 
 .sub-ledger tr:first-child td {
@@ -258,6 +262,31 @@ a {
 
 .sub-ledger .num {
   font-size: 12px;
+}
+
+/* nº de OP, comprobante, estado, fecha y monto no necesitan partirse en 2 líneas */
+.sub-ledger th:nth-child(1), .sub-ledger td:nth-child(1),
+.sub-ledger th:nth-child(2), .sub-ledger td:nth-child(2),
+.sub-ledger th:nth-child(4), .sub-ledger td:nth-child(4),
+.sub-ledger th:nth-child(5), .sub-ledger td:nth-child(5) {
+  white-space: nowrap;
+}
+
+.sub-ledger th:nth-child(6), .sub-ledger td:nth-child(6) {
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* categoría y notas son las que suelen traer texto largo -> les damos aire */
+.sub-ledger th:nth-child(3), .sub-ledger td:nth-child(3) {
+  min-width: 160px;
+}
+
+.sub-ledger th:nth-child(7), .sub-ledger td:nth-child(7) {
+  min-width: 220px;
+  white-space: normal;
+  word-break: break-word;
+  color: var(--slate);
 }
 
 .chip {
