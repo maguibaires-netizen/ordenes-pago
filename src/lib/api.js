@@ -36,6 +36,24 @@ export async function obtenerResumenPendientes() {
   return data.supermercados;
 }
 
+export async function obtenerComposicion() {
+  const res = await fetch("/api/composicion/list");
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Error al leer la composición de saldos");
+  return data;
+}
+
+export async function guardarComposicion(comprobantes) {
+  const res = await fetch("/api/composicion/guardar", {
+    method: "POST",
+    headers: headersConAuth(),
+    body: JSON.stringify({ comprobantes }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Error al guardar la composición de saldos");
+  return data;
+}
+
 export async function eliminarBloque(slug, filas) {
   const res = await fetch("/api/ordenes/eliminar-bloque", {
     method: "POST",
