@@ -1311,7 +1311,7 @@ a {
 }
 
 .comp-detalle-tabla tr.fila-dif td {
-  background: #fffaf1;
+  background: rgba(224, 161, 58, 0.04);
 }
 
 .comp-detalle-tabla tfoot td {

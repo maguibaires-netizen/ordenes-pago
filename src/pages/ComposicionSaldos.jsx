@@ -151,6 +151,8 @@ export default function ComposicionSaldos() {
     const enrich = (r, cid, i) => {
       const k = filaKey(cid, r, i);
       const ed = ediciones[k];
+      const importe = r.importe || 0;
+      const esDebe = importe > 0; // Facturas y ND cargan en Debe (quedan positivas); NC/recibos/retenciones en Haber (negativas)
       return {
         ...r,
         _k: k,
@@ -158,10 +160,15 @@ export default function ComposicionSaldos() {
         comentario: ed?.comentario != null ? ed.comentario : r.comentario,
         diasEmision: r.fecha ? dias(r.fecha, corte) : null,
         diasVencido: r.vencimiento ? dias(r.vencimiento, corte) : null,
+        _esDebe: esDebe,
         _impagoVencido:
-          Math.abs((r.importeOrigen || 0) - (r.importe || 0)) <= 1 &&
-          (r.importe || 0) !== 0 &&
+          Math.abs((r.importeOrigen || 0) - importe) <= 1 &&
+          importe !== 0 &&
           (r.vencimiento ? dias(r.vencimiento, corte) > 0 : false),
+        // sólo tiene sentido para comprobantes del Debe: si el importe quedó
+        // distinto del importe de origen, es que ya se aplicó algo (pago,
+        // retención, NC) y falta terminar de conciliar.
+        _conDiferencia: esDebe && Math.abs((r.importeOrigen || 0) - importe) > 1,
       };
     };
 
@@ -184,7 +191,7 @@ export default function ComposicionSaldos() {
       const saldo = all.reduce((s, r) => s + (r.importe || 0), 0);
       const venc = all.filter((r) => r.diasVencido > 0);
       const corr = all.filter((r) => !(r.diasVencido > 0));
-      const impagos = all.filter((r) => r._impagoVencido);
+      const impagos = all.filter((r) => r._esDebe && r._impagoVencido);
       const sum = (rs) => rs.reduce((s, r) => s + (r.importe || 0), 0);
       const prox = corr.map((r) => r.vencimiento).filter(Boolean).sort()[0];
       const f = c.ficha || {};
@@ -192,7 +199,7 @@ export default function ComposicionSaldos() {
       let filas = all.slice();
       if (filtro === "vencidos") filas = filas.filter((r) => r.diasVencido > 0);
       if (filtro === "corrientes") filas = filas.filter((r) => !(r.diasVencido > 0));
-      if (filtro === "impagos") filas = filas.filter((r) => r._impagoVencido);
+      if (filtro === "impagos") filas = filas.filter((r) => r._esDebe && r._impagoVencido);
       if (qNorm) filas = filas.filter((r) => ["numFactura", "observacion", "comentario", "condPago"].some((k) => String(r[k] ?? "").toLowerCase().includes(qNorm)));
 
       const sort = sortPorCuenta[c.id] || { key: "fecha", dir: 1 };
@@ -405,8 +412,8 @@ function CuentaCard({ c, esAdmin, corte, flipped, abierto, onFlip, onToggleDetal
             </div>
             <div className="comp-kpi">
               <div className="comp-label">Vencido pend. de NC</div>
-              <div className="mono comp-kpi-v" style={{ color: "#a06816" }}>{money(c.sum(c.venc.filter((r) => !r._impagoVencido)))}</div>
-              <div className="comp-kpi-det">{c.venc.filter((r) => !r._impagoVencido).length} comprobantes</div>
+              <div className="mono comp-kpi-v" style={{ color: "#a06816" }}>{money(c.sum(c.venc.filter((r) => r._esDebe && !r._impagoVencido)))}</div>
+              <div className="comp-kpi-det">{c.venc.filter((r) => r._esDebe && !r._impagoVencido).length} comprobantes</div>
             </div>
             <div className="comp-kpi">
               <div className="comp-label">Corriente</div>
@@ -531,7 +538,7 @@ function DetalleTabla({ c, esAdmin, onOrdenar, sort, onEditar }) {
         </thead>
         <tbody>
           {c.filas.map((r) => (
-            <tr key={r._k} className={r._impagoVencido ? "fila-dif" : ""}>
+            <tr key={r._k} className={r._conDiferencia ? "fila-dif" : ""}>
               {COLUMNAS_DETALLE.map((col) => {
                 const raw = r[col.key];
                 let v;
@@ -542,6 +549,7 @@ function DetalleTabla({ c, esAdmin, onOrdenar, sort, onEditar }) {
 
                 const editable = esAdmin && (col.key === "observacion" || col.key === "comentario");
                 const vencidaCol = col.key === "diasVencido" && r.diasVencido > 0;
+                const esDif = r._conDiferencia && (col.key === "importe" || col.key === "importeOrigen");
 
                 return (
                   <td
@@ -550,7 +558,8 @@ function DetalleTabla({ c, esAdmin, onOrdenar, sort, onEditar }) {
                     style={{
                       textAlign: col.align,
                       whiteSpace: col.key === "comentario" ? "normal" : "nowrap",
-                      background: vencidaCol ? "#fbecec" : "transparent",
+                      background: vencidaCol ? "#fbecec" : esDif ? "rgba(224, 161, 58, 0.09)" : "transparent",
+                      borderLeft: col.key === "importe" && r._conDiferencia ? "2px solid rgba(224, 161, 58, 0.55)" : "none",
                       color: vencidaCol ? "#b0433f" : col.key === "comentario" || col.key === "observacion" ? "var(--slate)" : "inherit",
                       fontWeight: vencidaCol ? 700 : col.key === "importe" ? 500 : 400,
                     }}
