@@ -192,6 +192,7 @@ export default function ComposicionSaldos() {
       const venc = all.filter((r) => r.diasVencido > 0);
       const corr = all.filter((r) => !(r.diasVencido > 0));
       const impagos = all.filter((r) => r._esDebe && r._impagoVencido);
+      const pendienteNC = all.filter((r) => r._conDiferencia);
       const sum = (rs) => rs.reduce((s, r) => s + (r.importe || 0), 0);
       const prox = corr.map((r) => r.vencimiento).filter(Boolean).sort()[0];
       const f = c.ficha || {};
@@ -226,6 +227,7 @@ export default function ComposicionSaldos() {
         all,
         prox,
         impagos,
+        pendienteNC,
         venc,
         corr,
         sum,
@@ -424,6 +426,11 @@ function CuentaCard({ c, esAdmin, corte, flipped, abierto, onFlip, onToggleDetal
               <div className="comp-label">Próximo vto.</div>
               <div className="mono comp-kpi-v">{c.prox ? fechaFmt(c.prox) : "—"}</div>
               <div className="comp-kpi-det">{c.prox ? `en ${dias(corte, c.prox)} días` : ""}</div>
+            </div>
+            <div className="comp-kpi">
+              <div className="comp-label">Pend. de NC</div>
+              <div className="mono comp-kpi-v" style={{ color: "#a06816" }}>{money(c.sum(c.pendienteNC))}</div>
+              <div className="comp-kpi-det">{c.pendienteNC.length} comprobantes</div>
             </div>
           </div>
 
