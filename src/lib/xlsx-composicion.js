@@ -32,7 +32,8 @@ const CLAVES = {
   fecha: ["fecha", "fecha contable", "fecha emision"],
   numFactura: ["n factura", "no factura", "n° factura", "nro factura", "numero comprobante", "n comprobante"],
   vencimiento: ["vencimiento", "fecha vencimiento", "vencim"],
-  importe: ["importe"],
+  debe: ["debe"],
+  haber: ["haber"],
   importeOrigen: ["importe origen", "imp origen"],
   condPago: ["cond pago", "cond. pago", "condicion de pago", "condicion pago"],
   observacion: ["observacion", "observaciones"],
@@ -41,13 +42,18 @@ const CLAVES = {
 
 // Busca el bloque "COMPOSICIÓN DE SALDO" dentro de una hoja (filas ya como
 // array de arrays) y devuelve los comprobantes que encuentra.
+// El importe de cada línea sale de Debe - Haber (débitos: facturas y ND;
+// créditos: NC, recibos, retenciones — quedan en negativo), porque el
+// export del ERP no trae una columna de importe neto lista para usar
+// (la de "Saldo" es un acumulado corriendo, no el importe de la línea).
 export function comprobantesDeHoja(filas) {
   let mapa = null;
   let inicio = -1;
 
   for (let i = 0; i < filas.length; i++) {
     const f = (filas[i] || []).map(normalizar);
-    if (!f.some((c) => c.startsWith("importe"))) continue;
+    if (!f.some((c) => c.startsWith("debe"))) continue;
+    if (!f.some((c) => c.startsWith("haber"))) continue;
     if (!f.some((c) => c.includes("vencim"))) continue;
 
     mapa = {};
@@ -57,7 +63,6 @@ export function comprobantesDeHoja(filas) {
       );
       if (idx >= 0) mapa[clave] = idx;
     });
-    if (mapa.importeOrigen != null && mapa.importe === mapa.importeOrigen) delete mapa.importe;
     inicio = i;
     break;
   }
@@ -68,7 +73,9 @@ export function comprobantesDeHoja(filas) {
   for (let i = inicio + 1; i < filas.length; i++) {
     const f = filas[i] || [];
     const fecha = aIso(f[mapa.fecha]);
-    const importe = aNumero(f[mapa.importe]);
+    const debe = aNumero(f[mapa.debe]);
+    const haber = aNumero(f[mapa.haber]);
+    const importe = debe - haber;
     if (!fecha && !importe) continue;
     if (!fecha) break; // se terminó el bloque de datos
 
