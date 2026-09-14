@@ -1,67 +1,16 @@
-# Cobranzas — Portal
+# React + Vite
 
-Portal web del sector de Créditos y Cobranzas: reportes propios y accesos directos a las planillas del equipo, todo en un solo lugar.
+This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
-## Estructura
+Currently, two official plugins are available:
 
-```
-cobranzas-cartera/
-├── index.html
-├── package.json
-├── vite.config.js
-└── src/
-    ├── main.jsx              ← punto de entrada, no hace falta tocarlo
-    ├── index.css             ← estilos compartidos (colores, tipografía, tarjetas)
-    ├── App.jsx               ← define las rutas (qué página se ve en cada URL)
-    ├── components/
-    │   ├── Layout.jsx        ← navbar de arriba, en todas las páginas
-    │   ├── Navbar.jsx
-    │   └── SheetEmbed.jsx    ← plantilla reusable para embeber un Google Sheet
-    └── pages/
-        ├── Home.jsx                  ← pantalla de bienvenida / selector
-        ├── CarteraClientes.jsx       ← reporte de cartera (el primero que armamos)
-        ├── PedidosPendientes.jsx     ← planilla + reporte, con pestañas
-        ├── ChequesRechazados.jsx
-        ├── PendientesConciliar.jsx
-        └── Legajos.jsx               ← todavía sin desarrollar
-```
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## Pendiente: completar 2 IDs de Sheets
+## React Compiler
 
-En `src/pages/ChequesRechazados.jsx` y `src/pages/PendientesConciliar.jsx` hay una línea:
-```js
-const SHEET_ID = "PEGAR_ID_ACA";
-```
-Reemplazá `PEGAR_ID_ACA` por el ID real de cada planilla (mismo procedimiento que ya hiciste antes: de la URL del Sheet, la parte entre `/d/` y `/edit`).
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## 1) Probarlo en tu máquina (opcional, pero recomendado)
+## Expanding the Oxlint configuration
 
-Necesitás [Node.js](https://nodejs.org) instalado (versión 18 o más nueva).
-
-```bash
-npm install
-npm run dev
-```
-
-Te va a abrir algo como `http://localhost:5173` con la app corriendo.
-
-## 2) Subir los cambios a GitHub
-
-```bash
-git add .
-git commit -m "Portal completo con navegación"
-git push
-```
-
-## 3) Vercel redeploya solo
-
-En 1-2 minutos el link de siempre (`cobranzas-cartera.vercel.app`) ya va a mostrar el portal completo, con la pantalla de bienvenida como página principal.
-
-## Cómo agregar una herramienta nueva más adelante
-
-1. Creás un archivo nuevo en `src/pages/` (por ejemplo `Legajos.jsx` ya existe como placeholder — cuando la desarrollemos, se reemplaza ese archivo).
-2. Si es otro Google Sheet simple, podés reusar `SheetEmbed` como hacen `ChequesRechazados.jsx` y `PendientesConciliar.jsx` — es la forma más corta de agregar una planilla nueva.
-3. Agregás la ruta nueva en `src/App.jsx` (una línea `<Route path="..." element={...} />`).
-4. Agregás la tarjeta correspondiente en `src/pages/Home.jsx`.
-
-Avisame cuando quieras sumar algo y lo hacemos juntas.
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.

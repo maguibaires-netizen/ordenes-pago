@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar.jsx";
 
-const FULL_HEIGHT_PATHS = ["/pedidos-pendientes", "/cheques-rechazados", "/pendientes-conciliar", "/carga-retenciones"];
+const FULL_HEIGHT_PATHS = ["/pedidos-pendientes", "/cheques-rechazados", "/pendientes-conciliar"];
 
 export default function Layout({ children }) {
   const location = useLocation();
