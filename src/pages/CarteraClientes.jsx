@@ -21,10 +21,10 @@ const COLORS = {
 
 const BUCKET_LABELS = {
   porVencer: "A vencer",
-  b0_30: "0–30 días",
-  b30_60: "30–60 días",
-  b60_90: "60–90 días",
-  b90plus: "+90 días",
+  b0_30: "Vencido -30",
+  b30_60: "Vencido +30",
+  b60_90: "Vencido +60",
+  b90plus: "Vencido +90",
 };
 
 const BUCKET_ORDER = ["porVencer", "b0_30", "b30_60", "b60_90", "b90plus"];
@@ -180,9 +180,20 @@ export default function CarteraClientes() {
     // Saldos < 1 (cero o a favor) no se consideran deuda vencida: son crédito pendiente de conciliar.
     const vencido = filtered.filter((r) => r.dias > 0 && r.saldo >= 1).reduce((s, r) => s + r.saldo, 0);
     const saldoAFavor = filtered.filter((r) => r.saldo < 1).reduce((s, r) => s + r.saldo, 0);
-    const criticos = filtered.filter((r) => r.bucket === "b90plus" && r.saldo >= 1).reduce((s, r) => s + r.saldo, 0);
+
+    // Crítico = vencido hace más de 60 días (pedido del jefe: antes era +90).
+    const criticosRows = filtered.filter((r) => r.dias > 60 && r.saldo >= 1);
+    const criticos = criticosRows.reduce((s, r) => s + r.saldo, 0);
+    const criticosPorClienteMap = new Map();
+    criticosRows.forEach((r) => {
+      criticosPorClienteMap.set(r.cliente, (criticosPorClienteMap.get(r.cliente) || 0) + r.saldo);
+    });
+    const criticosClientes = Array.from(criticosPorClienteMap.entries())
+      .map(([cliente, monto]) => ({ cliente, monto }))
+      .sort((a, b) => b.monto - a.monto);
+
     const pctVencido = total !== 0 ? (vencido / total) * 100 : 0;
-    return { total, vencido, saldoAFavor, criticos, pctVencido, clientes: byCliente.length };
+    return { total, vencido, saldoAFavor, criticos, criticosClientes, pctVencido, clientes: byCliente.length };
   }, [filtered, byCliente]);
 
   const projection = useMemo(() => {
@@ -248,7 +259,8 @@ export default function CarteraClientes() {
           .no-print { display: none !important; }
           body, div { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           .print-scroll { max-height: none !important; overflow: visible !important; }
-          table.cartera-table tr { page-break-inside: avoid; }
+          .cliente-row { page-break-inside: avoid; }
+          .factura-row { page-break-inside: avoid; }
           .print-card { break-inside: avoid; }
           .recharts-wrapper { break-inside: avoid; }
         }
@@ -315,7 +327,6 @@ export default function CarteraClientes() {
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 24 }}>
             <Kpi icon={<Wallet size={14} />} label="Total cartera" value={fmtMoney(kpis.total)} sub={`${kpis.clientes} clientes`} />
             <Kpi icon={<AlertTriangle size={14} />} label="Total vencido" value={fmtMoney(kpis.vencido)} sub={`${kpis.pctVencido.toFixed(1)}% de la cartera`} tint={COLORS.b60_90} />
-            <Kpi icon={<AlertTriangle size={14} />} label="Crítico (+90 días)" value={fmtMoney(kpis.criticos)} sub="Requiere gestión prioritaria" tint={COLORS.b90plus} />
             <Kpi icon={<Wallet size={14} />} label="Saldo a favor / a cuenta" value={fmtMoney(Math.abs(kpis.saldoAFavor))} sub="Pendiente de conciliar" tint={COLORS.muted} />
             <Kpi icon={<CalendarClock size={14} />} label="A vencer 0–7 días" value={fmtMoney(projection["0–7 días"].total)} sub="Próxima semana" tint={COLORS.porVencer} />
           </div>
@@ -326,6 +337,22 @@ export default function CarteraClientes() {
             </div>
           ) : (
             <>
+              {/* Clientes en estado crítico (+60 días) */}
+              {kpis.criticosClientes.length > 0 && (
+                <div className="print-card" style={{ border: `1px solid ${COLORS.b90plus}55`, background: COLORS.b90plus + "0D", borderRadius: 12, padding: 20, marginBottom: 24 }}>
+                  <div className="display" style={{ fontSize: 14, fontWeight: 600, marginBottom: 4, color: COLORS.b90plus }}>Clientes en estado crítico (+60 días)</div>
+                  <div style={{ fontSize: 12, color: COLORS.muted, marginBottom: 12 }}>Apertura del monto crítico por cliente, de mayor a menor</div>
+                  <div className="print-scroll" style={{ maxHeight: 220, overflowY: "auto", display: "flex", flexDirection: "column", gap: 6 }}>
+                    {kpis.criticosClientes.map((cl) => (
+                      <div key={cl.cliente} style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 13, padding: "4px 0", borderBottom: `1px solid ${COLORS.b90plus}22` }}>
+                        <span>{cl.cliente}</span>
+                        <span className="mono" style={{ color: COLORS.b90plus, fontWeight: 600, flexShrink: 0 }}>{fmtMoney(cl.monto)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Gráfico */}
               <div style={{ border: `1px solid ${COLORS.border}`, borderRadius: 12, padding: 20, marginBottom: 24 }}>
                 <div className="display" style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Saldo por cliente y antigüedad</div>
@@ -400,7 +427,7 @@ export default function CarteraClientes() {
                   <tbody>
                     {byCliente.map((c) => (
                       <>
-                        <tr key={c.cliente} onClick={() => toggleExpand(c.cliente)} style={{ cursor: "pointer" }}>
+                        <tr key={c.cliente} className="cliente-row" onClick={() => toggleExpand(c.cliente)} style={{ cursor: "pointer" }}>
                           <td style={{ width: 20, color: COLORS.muted }}>
                             {expanded.has(c.cliente) ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                           </td>
@@ -425,7 +452,7 @@ export default function CarteraClientes() {
                                 </thead>
                                 <tbody>
                                   {c.invoices.map((inv, i) => (
-                                    <tr key={i}>
+                                    <tr key={i} className="factura-row">
                                       <td className="mono" style={{ padding: "6px 10px", fontSize: 12 }}>{inv.empresa}</td>
                                       <td className="mono" style={{ padding: "6px 10px", fontSize: 12 }}>{inv.nroComp}</td>
                                       <td className="mono" style={{ padding: "6px 10px", fontSize: 12 }}>{fmtDate(inv.fechaEmi)}</td>
