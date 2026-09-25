@@ -797,5 +797,137 @@ export const cuentas = [
       "cantidad": 0,
       "monto": 0
     }
+  },
+  {
+    "id": "jumbo",
+    "nombre": "Jumbo",
+    "ficha": {
+      "opBaires": "",
+      "portalNombre": "",
+      "portalUrl": "",
+      "codigoProveedor": "",
+      "cuit": "",
+      "usuario": "",
+      "contra": "",
+      "plazo": "",
+      "acuerdo": "",
+      "acuerdos": {
+        "acc": "",
+        "escala": "",
+        "noDev": "",
+        "log": "",
+        "publ": "",
+        "voraz": "",
+        "criadores": "",
+        "kongo": ""
+      },
+      "codigoAcuerdo": ""
+    },
+    "sncPendientes": [],
+    "comprobantes": [],
+    "pendientesOP": {
+      "fuente": "Órdenes de pago",
+      "cantidad": 0,
+      "monto": 0
+    }
+  },
+  {
+    "id": "millan",
+    "nombre": "Millán S.A.",
+    "ficha": {
+      "opBaires": "",
+      "portalNombre": "",
+      "portalUrl": "",
+      "codigoProveedor": "",
+      "cuit": "",
+      "usuario": "",
+      "contra": "",
+      "plazo": "",
+      "acuerdo": "",
+      "acuerdos": {
+        "acc": "",
+        "escala": "",
+        "noDev": "",
+        "log": "",
+        "publ": "",
+        "voraz": "",
+        "criadores": "",
+        "kongo": ""
+      },
+      "codigoAcuerdo": ""
+    },
+    "sncPendientes": [],
+    "comprobantes": [],
+    "pendientesOP": {
+      "fuente": "Órdenes de pago",
+      "cantidad": 0,
+      "monto": 0
+    }
+  },
+  {
+    "id": "pedidosya",
+    "nombre": "PedidosYa",
+    "ficha": {
+      "opBaires": "",
+      "portalNombre": "",
+      "portalUrl": "",
+      "codigoProveedor": "",
+      "cuit": "",
+      "usuario": "",
+      "contra": "",
+      "plazo": "",
+      "acuerdo": "",
+      "acuerdos": {
+        "acc": "",
+        "escala": "",
+        "noDev": "",
+        "log": "",
+        "publ": "",
+        "voraz": "",
+        "criadores": "",
+        "kongo": ""
+      },
+      "codigoAcuerdo": ""
+    },
+    "sncPendientes": [],
+    "comprobantes": [],
+    "pendientesOP": {
+      "fuente": "Órdenes de pago",
+      "cantidad": 0,
+      "monto": 0
+    }
+  },
+  {
+    "id": "maycar",
+    "nombre": "Maycar S.A. (Vital)",
+    "ficha": {
+      "opBaires": "",
+      "portalNombre": "",
+      "portalUrl": "",
+      "codigoProveedor": "",
+      "cuit": "",
+      "usuario": "",
+      "contra": "",
+      "plazo": "",
+      "acuerdo": "",
+      "acuerdos": {
+        "acc": "",
+        "escala": "",
+        "noDev": "",
+        "log": "",
+        "publ": "",
+        "voraz": "",
+        "criadores": "",
+        "kongo": ""
+      },
+      "codigoAcuerdo": ""
+    },
+    "sncPendientes": [],
+    "comprobantes": [],
+    "pendientesOP": {
+      "fuente": "Órdenes de pago",
+      "cantidad": 0,
+      "monto": 0
+    }
   }
 ];

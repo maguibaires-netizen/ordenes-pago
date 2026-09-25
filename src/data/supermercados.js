@@ -13,6 +13,10 @@ export const supermercados = [
   { slug: "aiello", nombre: "Supermercado Aiello S.A" },
   { slug: "coto", nombre: "Coto Centro Integral de Comerc" },
   { slug: "almacor", nombre: "Coop. De Prov. Y Cto Almacor L" },
+  { slug: "jumbo", nombre: "Jumbo" },
+  { slug: "millan", nombre: "Millán S.A." },
+  { slug: "pedidosya", nombre: "PedidosYa" },
+  { slug: "maycar", nombre: "Maycar S.A. (Vital)" },
 ];
 
 export function iniciales(nombre) {
