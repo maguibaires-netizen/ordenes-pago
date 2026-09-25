@@ -21,6 +21,10 @@ export const SHEETS = {
     sheetId: "1JaKueacZWDJ5_AS9Hpkkwbr6pcSygpZfzcCMDVyNczo",
     pestaña: "Cargadas web",
   },
+  jumbo: {
+    sheetId: "1Lk0hbPdbSTjTaza1F5JRUlzy74xdS-06WrWFeV3B2yg",
+    pestaña: "Cargadas web",
+  },
 };
 
 // Columnas en el orden exacto en que están en la fila 1 de "Cargadas web"

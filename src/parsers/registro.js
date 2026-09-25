@@ -9,6 +9,7 @@ export const PARSERS = {
   carrefour: parsearOrdenDePagoCarrefour,
   makro: parsearOrdenDePagoRemadv,
   cencosud: parsearOrdenDePagoRemadv,
+  jumbo: parsearOrdenDePagoRemadv,
   coto: parsearOrdenDePagoCoto,
   dorinka: parsearOrdenDePagoDorinka,
 };
