@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
-import { Upload, Eye, Search, X, Check, FileSpreadsheet, ChevronDown, Trash2 } from "lucide-react";
+import { Upload, Eye, Search, X, Check, FileSpreadsheet, ChevronDown, Trash2, Paperclip } from "lucide-react";
 import Topbar from "../components/Topbar";
 import Dropzone from "../components/Dropzone";
+import AdjuntarComprobantes from "../components/AdjuntarComprobantes";
 import { supermercados } from "../data/supermercados";
 import { logoDe } from "../data/logos";
 import { PARSERS, ESTADOS } from "../parsers/registro";
-import { guardarOrdenes, listarOrdenes, actualizarCelda, eliminarBloque } from "../lib/api";
+import { guardarOrdenes, listarOrdenes, actualizarCelda, eliminarBloque, abrirComprobante } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 
 function claseEstado(estado) {
@@ -289,6 +290,7 @@ function PanelVer({ slug, editable }) {
   const [filtroEstado, setFiltroEstado] = useState("");
   const [editando, setEditando] = useState(null); // `${rowIndex}-${campo}`
   const [abiertos, setAbiertos] = useState(() => new Set());
+  const [mostrarAdjuntar, setMostrarAdjuntar] = useState(false);
 
   const cargar = useCallback(async () => {
     setError("");
@@ -365,6 +367,12 @@ function PanelVer({ slug, editable }) {
           <option value="">Todos los estados</option>
           {ESTADOS.map((e) => <option key={e} value={e}>{e}</option>)}
         </select>
+        {editable && (
+          <button className="btn" style={{ marginLeft: "auto" }} onClick={() => setMostrarAdjuntar(true)}>
+            <Paperclip size={14} strokeWidth={1.8} />
+            Adjuntar comprobantes
+          </button>
+        )}
       </div>
       <div className="ledger">
         <table>
@@ -445,6 +453,15 @@ function PanelVer({ slug, editable }) {
           </tbody>
         </table>
       </div>
+
+      {mostrarAdjuntar && (
+        <AdjuntarComprobantes
+          slug={slug}
+          filas={filas}
+          onClose={() => setMostrarAdjuntar(false)}
+          onListo={cargar}
+        />
+      )}
     </div>
   );
 }
@@ -488,7 +505,20 @@ function CeldaFila({ fila, editando, setEditando, guardarCampo, toggle, editable
           <div style={{ flex: 1 }}><CeldaTexto campo="nroAviso" mono /></div>
         </div>
       </td>
-      <td><CeldaTexto campo="comprobante" mono /></td>
+      <td>
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <div style={{ flex: 1 }}><CeldaTexto campo="comprobante" mono /></div>
+          {f.adjunto && (
+            <button
+              className="chev-btn adjunto-btn"
+              title="Ver comprobante adjunto"
+              onClick={() => abrirComprobante(f.adjunto).catch((err) => window.alert(err.message))}
+            >
+              <Paperclip size={13} />
+            </button>
+          )}
+        </div>
+      </td>
       <td><CeldaTexto campo="categoria" /></td>
       <td className="estado-cell">
         {editable && editando === key("estado") ? (

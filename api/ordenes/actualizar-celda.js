@@ -10,6 +10,7 @@ const COLUMNA = {
   fecha: "E",
   importe: "F",
   notas: "G",
+  adjunto: "H",
 };
 
 export default async function handler(req, res) {

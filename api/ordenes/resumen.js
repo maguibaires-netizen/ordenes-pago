@@ -17,7 +17,7 @@ export default async function handler(req, res) {
         try {
           const { data } = await sheets.spreadsheets.values.get({
             spreadsheetId: config.sheetId,
-            range: `${config.pestaña}!A2:G`,
+            range: `${config.pestaña}!A2:H`,
           });
 
           const items = (data.values || [])
@@ -30,6 +30,7 @@ export default async function handler(req, res) {
               fecha: fila[4] || "",
               importe: numeroDesdeCelda(fila[5]),
               notas: fila[6] || "",
+              adjunto: fila[7] || "",
             }))
             // "pendiente de resolver" = únicamente Pendiente o Enviado a compras/cpag
             .filter((f) => f.estado === "Pendiente" || f.estado === "Enviado a compras/cpag");

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Download, ChevronDown } from "lucide-react";
+import { Download, ChevronDown, Paperclip } from "lucide-react";
 import { supermercados } from "../data/supermercados";
-import { obtenerResumenPendientes, actualizarCelda } from "../lib/api";
+import { obtenerResumenPendientes, actualizarCelda, abrirComprobante } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 
 const ESTADOS = ["Pendiente", "Generada", "Conciliada", "CC incompleta", "Enviado a compras/cpag"];
@@ -152,7 +152,19 @@ export default function PendientesPanel() {
                                 return (
                                   <tr key={i.rowIndex}>
                                     <td className="mono">{i.nroAviso}</td>
-                                    <td>{i.comprobante}</td>
+                                    <td>
+                                      {i.comprobante}
+                                      {i.adjunto && (
+                                        <button
+                                          className="chev-btn adjunto-btn"
+                                          style={{ display: "inline-flex", verticalAlign: "middle", marginLeft: 4 }}
+                                          title="Ver comprobante adjunto"
+                                          onClick={() => abrirComprobante(i.adjunto).catch((err) => window.alert(err.message))}
+                                        >
+                                          <Paperclip size={13} />
+                                        </button>
+                                      )}
+                                    </td>
                                     <td>{i.categoria}</td>
                                     <td className="estado-cell">
                                       {editando === key ? (

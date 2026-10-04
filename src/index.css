@@ -1354,3 +1354,201 @@ a {
   display: inline-block;
   margin-right: 4px;
 }
+
+/* ---------- Comprobantes adjuntos ---------- */
+
+.adjunto-btn {
+  color: var(--accent-ink);
+}
+
+.adjunto-btn:hover {
+  background: var(--accent-soft);
+}
+
+.modal-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(28, 42, 54, 0.38);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal-caja {
+  background: var(--white);
+  border-radius: 18px;
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  max-width: 860px;
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 22px;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.modal-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-cabecera h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.modal-pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.adj-lista {
+  overflow: auto;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+}
+
+.adj-tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.adj-tabla th {
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--slate);
+  padding: 9px 12px;
+  background: #eef1f4;
+  position: sticky;
+  top: 0;
+}
+
+.adj-tabla td {
+  padding: 9px 12px;
+  font-size: 12.5px;
+  border-top: 1px solid var(--line-soft);
+  vertical-align: top;
+}
+
+.adj-nombre {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.adj-aviso {
+  font-size: 11.5px;
+  color: #a06816;
+  margin-top: 2px;
+}
+
+.adj-error {
+  font-size: 11.5px;
+  color: #b0433f;
+  margin-top: 2px;
+}
+
+.adj-select {
+  border: 1px solid var(--line);
+  max-width: 100%;
+}
+
+/* ---------- Previsiones / Facturación ---------- */
+
+.prev-shell {
+  max-width: 1260px;
+}
+
+.prev-mes-bloque {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  padding: 16px 18px;
+  flex-wrap: wrap;
+}
+
+.kpi-clickeable {
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.kpi-clickeable:hover {
+  background: var(--paper);
+}
+
+.prev-bloque-super {
+  margin-bottom: 10px;
+}
+
+.prev-bloque-cabecera {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: var(--white);
+  border: none;
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  padding: 10px 14px;
+  text-align: left;
+}
+
+.prev-bloque-cabecera:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.prev-marcas-lista {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  margin-top: 8px;
+  padding: 6px 16px;
+}
+
+.prev-marca-fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.prev-marca-fila:first-child {
+  border-top: none;
+}
+
+.prev-marca-nombre {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 140px;
+}
+
+.prev-marca-barra-wrap {
+  flex: 1;
+  height: 6px;
+  background: var(--paper);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.prev-marca-barra {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+}

@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     const sheets = sheetsClient();
     const { data } = await sheets.spreadsheets.values.get({
       spreadsheetId: config.sheetId,
-      range: `${config.pestaña}!A2:G`, // salta la fila de encabezados
+      range: `${config.pestaña}!A2:H`, // salta la fila de encabezados (H = id del comprobante adjunto en Drive)
     });
 
     const filas = (data.values || []).map((fila, i) => ({
@@ -31,6 +31,7 @@ export default async function handler(req, res) {
       fecha: fila[4] || "",
       importe: numeroDesdeCelda(fila[5]),
       notas: fila[6] || "",
+      adjunto: fila[7] || "",
     }));
 
     return res.status(200).json({ filas });

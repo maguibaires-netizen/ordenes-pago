@@ -4,8 +4,7 @@ import { logoBaires } from "../data/logos";
 import { useAuth } from "../context/AuthContext";
 
 const links = [
-  { to: "/acuerdos", label: "Acuerdos" },
-  { to: "/previsiones", label: "Previsiones" },
+  { to: "/previsiones", label: "Previsiones y acuerdos" },
   { to: "/composicion-saldos", label: "Composición de saldos" },
 ];
 

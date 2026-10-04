@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Supermercado from "./pages/Supermercado";
 import ComposicionSaldos from "./pages/ComposicionSaldos";
+import Previsiones from "./pages/Previsiones";
 
 export default function App() {
   const { rol } = useAuth();
@@ -17,6 +18,7 @@ export default function App() {
       <Route path="/super/:slug/subir" element={<Supermercado />} />
       <Route path="/super/:slug/ver" element={<Supermercado />} />
       <Route path="/composicion-saldos" element={<ComposicionSaldos />} />
+      <Route path="/previsiones" element={<Previsiones />} />
     </Routes>
   );
 }

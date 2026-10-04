@@ -28,3 +28,10 @@ export function requiereAdmin(req) {
   const token = req.headers["x-auth-token"];
   return verificarToken(token) === "admin";
 }
+
+// Para endpoints que puede usar cualquiera que haya iniciado sesión
+// (admin o vendedor), como abrir un comprobante adjunto.
+export function requiereSesion(req) {
+  const rol = verificarToken(req.headers["x-auth-token"]);
+  return rol === "admin" || rol === "vendedor";
+}
