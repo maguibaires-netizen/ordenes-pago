@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  body { margin: 0; background: #f6f7f9; color: #1c2a36; font-family: "Manrope", -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #1d4d7a; text-decoration: none; }
+  a:hover { color: #1c2a36; }
+  ::selection { background: #e8f0f7; }
+  button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #2f5f8f; outline-offset: 2px; }
+  input, select { font-family: inherit; }
+</style>
+</helmet>
+<div style="max-width:1460px; margin:0 auto; padding:0 28px 72px">
+
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:20px; padding:20px 0 18px">
+    <img src="logos/baires.png" alt="Baires" style="height:52px; width:auto; display:block">
+    <nav style="display:flex; gap:4px; background:#ffffff; padding:4px; border-radius:16px; box-shadow:0 1px 2px rgba(28,42,54,0.05)">
+      <a href="#" style="font-size:13px; font-weight:600; color:#5c6b78; padding:9px 15px; border-radius:12px" style-hover="background:#e8f0f7; color:#1d4d7a">Órdenes de pago</a>
+      <a href="#" style="font-size:13px; font-weight:600; color:#ffffff; background:#1c2a36; padding:9px 15px; border-radius:12px">Previsiones y acuerdos</a>
+      <a href="Composicion de saldos v3.dc.html" style="font-size:13px; font-weight:600; color:#5c6b78; padding:9px 15px; border-radius:12px" style-hover="background:#e8f0f7; color:#1d4d7a">Composición de saldos</a>
+    </nav>
+    <div style="display:flex; align-items:center; gap:4px; background:#ffffff; padding:4px; border-radius:999px; box-shadow:0 1px 2px rgba(28,42,54,0.05)">
+      <button type="button" onClick="{{ verAdmin }}" style="border:none; border-radius:999px; padding:7px 14px; font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; cursor:pointer; background:{{ adminBg }}; color:{{ adminColor }}">Admin</button>
+      <button type="button" onClick="{{ verVendedor }}" style="border:none; border-radius:999px; padding:7px 14px; font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; cursor:pointer; background:{{ vendBg }}; color:{{ vendColor }}">Vendedor</button>
+    </div>
+  </div>
+
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:14px">
+    <div style="display:flex; align-items:baseline; gap:12px">
+      <h1 style="font-size:24px; font-weight:700; margin:0; letter-spacing:-0.02em">Previsiones y acuerdos</h1>
+      <span style="font-size:12px; font-weight:600; padding:4px 11px; border-radius:999px; background:#e8f0f7; color:#1d4d7a">{{ periodoNombre }}</span>
+      <button type="button" onClick="{{ exportar }}" title="Un Excel con una hoja por subpestaña" style="align-self:center; background:#ffffff; border:none; border-radius:10px; padding:7px 13px; font-size:12.5px; font-weight:600; color:#1c2a36; box-shadow:0 1px 2px rgba(28,42,54,0.05); cursor:pointer" style-hover="background:#e8f0f7; color:#1d4d7a">Exportar Excel</button>
+    </div>
+    <div style="display:flex; align-items:stretch; gap:6px; flex-wrap:wrap">
+      <sc-for list="{{ pasos }}" as="p" hint-placeholder-count="4">
+        <div style="display:flex; align-items:center; gap:9px; background:#ffffff; border-radius:12px; padding:7px 12px 7px 8px; box-shadow:0 1px 2px rgba(28,42,54,0.05)">
+          <span style="width:22px; height:22px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; background:{{ p.dotBg }}; color:{{ p.dotColor }}">{{ p.n }}</span>
+          <div style="display:flex; flex-direction:column">
+            <span style="font-size:11px; font-weight:700; color:#1c2a36; white-space:nowrap">{{ p.label }}</span>
+            <span style="font-size:11px; color:{{ p.detColor }}; white-space:nowrap">{{ p.det }}</span>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:4px; border-bottom:1px solid #dde3e8; margin-bottom:18px; overflow-x:auto">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+      <button type="button" onClick="{{ t.go }}" style="display:flex; align-items:center; gap:7px; background:transparent; border:none; border-bottom:2px solid {{ t.line }}; margin-bottom:-1px; padding:11px 14px; font-size:13.5px; font-weight:600; color:{{ t.color }}; cursor:pointer; white-space:nowrap" style-hover="color:#1d4d7a">
+        <span>{{ t.label }}</span>
+        <sc-if value="{{ t.tieneBadge }}" hint-placeholder-val="{{ false }}">
+          <span style="font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:999px; background:{{ t.badgeBg }}; color:{{ t.badgeColor }}">{{ t.badge }}</span>
+        </sc-if>
+      </button>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ hayMsg }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex; align-items:center; gap:10px; background:#e8f0f7; color:#1d4d7a; border-radius:12px; padding:10px 14px; font-size:13px; margin-bottom:14px">
+      <span style="flex:1">{{ msg }}</span>
+      <button type="button" onClick="{{ cerrarMsg }}" style="background:transparent; border:none; color:#1d4d7a; font-size:12px; font-weight:600; cursor:pointer">Cerrar</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ esFact }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex; flex-direction:column; gap:14px">
+
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:#ffffff; border-radius:16px; box-shadow:0 1px 2px rgba(28,42,54,0.05); padding:14px 16px">
+        <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:240px">
+          <span style="font-size:14px; font-weight:700">{{ factTitulo }}</span>
+          <span style="font-size:12.5px; color:#5c6b78">{{ factEstado }}</span>
+        </div>
+        <sc-if value="{{ admin }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex; gap:8px; flex-wrap:wrap">
+            <button type="button" onClick="{{ leerHojaFact }}" style="background:#f6f7f9; border:none; border-radius:12px; padding:9px 15px; font-size:13px; font-weight:600; color:#1c2a36; cursor:pointer" style-hover="background:#e8f0f7; color:#1d4d7a">Leer hoja Facturación</button>
+            <button type="button" onClick="{{ abrirArchivoFact }}" style="background:#1d4d7a; border:none; border-radius:12px; padding:9px 16px; font-size:13px; font-weight:600; color:#ffffff; cursor:pointer" style-hover="background:#1c2a36">Importar Excel del ERP</button>
+            <input type="file" accept=".xlsx" ref="{{ factFileRef }}" onChange="{{ onArchivoFact }}" style="display:none">
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="display:flex">
+        <div style="display:flex; background:#ffffff; border-radius:12px; padding:4px; box-shadow:0 1px 2px rgba(28,42,54,0.05)">
+          <button type="button" onClick="{{ verListado }}" style="border:none; border-radius:9px; padding:9px 18px; font-size:13px; font-weight:600; cursor:pointer; background:{{ listadoBg }}; color:{{ listadoColor }}">A · Artículos por super</button>
+          <button type="button" onClick="{{ verTarjetas }}" style="border:none; border-radius:9px; padding:9px 18px; font-size:13px; font-weight:600; cursor:pointer; background:{{ tarjetasBg }}; color:{{ tarjetasColor }}">B · Marcas por super</button>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:1px; background:#eaeef1; border-radius:14px; overflow:hidden">
+        <sc-for list="{{ factKpis }}" as="k" hint-placeholder-count="4">
+          <button type="button" onClick="{{ k.abrir }}" disabled="{{ k.fijo }}" style="display:flex; flex-direction:column; align-items:flex-start; gap:2px; background:#ffffff; border:none; padding:13px 16px; text-align:left; cursor:{{ k.cursor }}; font-family:inherit" style-hover="background:{{ k.hover }}">
+            <span style="display:flex; align-items:center; gap:6px; width:100%">
+              <span style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#5c6b78">{{ k.label }}</span>
+              <span style="margin-left:auto; font-size:11.5px; font-weight:600; color:#1d4d7a">{{ k.accion }}</span>
+            </span>
+            <span style="font-family:'IBM Plex Mono', monospace; font-size:17px; font-weight:500; margin-top:2px; color:{{ k.color }}; white-space:nowrap">{{ k.v }}</span>
+            <span style="font-size:11.5px; color:#5c6b78">{{ k.det }}</span>
+          </button>
+        </sc-for>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:#ffffff; border-radius:14px; box-shadow:0 1px 2px rgba(28,42,54,0.05); padding:10px 12px">
+        <span style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#5c6b78; padding:0 4px">Filtros</span>
+        <input type="search" placeholder="Buscar artículo o comprobante…" value="{{ fq }}" onChange="{{ onFq }}" style="background:#f6f7f9; border:none; border-radius:10px; padding:9px 13px; font-size:13px; color:#1c2a36; flex:1; min-width:200px; max-width:280px">
+        <select value="{{ fSuper }}" onChange="{{ onFSuper }}" style="background:#f6f7f9; border:none; border-radius:10px; padding:9px 11px; font-size:13px; color:#5c6b78">
+          <option value="">Todos los supers</option>
+          <sc-for list="{{ superOpts }}" as="o" hint-placeholder-count="4">
+            <option value="{{ o.id }}">{{ o.nombre }}</option>
+          </sc-for>
+        </select>
+        <select value="{{ fMarca }}" onChange="{{ onFMarca }}" style="background:#f6f7f9; border:none; border-radius:10px; padding:9px 11px; font-size:13px; color:#5c6b78">
+          <option value="">Todas las marcas</option>
+          <sc-for list="{{ marcaOpts }}" as="o" hint-placeholder-count="4">
+            <option value="{{ o.v }}">{{ o.v }}</option>
+          </sc-for>
+        </select>
+        <select value="{{ fTipo }}" onChange="{{ onFTipo }}" style="background:#f6f7f9; border:none; border-radius:10px; padding:9px 11px; font-size:13px; color:#5c6b78">
+          <option value="">Factura, NC y ND</option>
+          <option value="Factura">Sólo facturas</option>
+          <option value="NC">Sólo NC</option>
+          <option value="ND">Sólo ND</option>
+        </select>
+        <div style="display:flex; align-items:center; gap:6px; background:#f6f7f9; border-radius:10px; padding:4px 10px; font-size:12px; color:#5c6b78">
+          <span>Desde</span>
+          <input type="date" value="{{ fDesde }}" onChange="{{ onFDesde }}" style="border:none; font-size:12.5px; color:#1c2a36; background:transparent">
+          <span>hasta</span>
+          <input type="date" value="{{ fHasta }}" onChange="{{ onFHasta }}" style="border:none; font-size:12.5px; color:#1c2a36; background:transparent">
+        </div>
+        <sc-if value="{{ hayFiltros }}" hint-placeholder-val="{{ false }}">
+          <button type="button" onClick="{{ limpiarFiltros }}" style="background:transparent; border:none; font-size:12.5px; font-weight:600; color:#1d4d7a; cursor:pointer">Limpiar</button>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ vistaListado }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; flex-direction:column; gap:10px">
+          <sc-for list="{{ grupos }}" as="g" hint-placeholder-count="4">
+            <div style="background:#ffffff; border-radius:16px; box-shadow:0 1px 2px rgba(28,42,54,0.05); overflow:hidden">
+              <button type="button" onClick="{{ g.toggle }}" style="display:flex; align-items:center; gap:12px; width:100%; background:transparent; border:none; padding:12px 16px; cursor:pointer; text-align:left" style-hover="background:#fafbfc">
+                <span style="font-size:12px; color:#5c6b78; width:12px; display:inline-block; transform:{{ g.giro }}; transition:transform 200ms">▸</span>
+                <div style="width:32px; height:32px; border-radius:9px; border:1px solid #eaeef1; background:#ffffff; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0">
+                  <sc-if value="{{ g.tieneLogo }}" hint-placeholder-val="{{ false }}"><img ref="{{ g.logoRef }}" alt="" style="width:100%; height:100%; object-fit:contain; padding:4px; box-sizing:border-box"></sc-if>
+                  <sc-if value="{{ g.sinLogo }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px; font-weight:700; color:#5c6b78">{{ g.iniciales }}</span></sc-if>
+                </div>
+                <span style="font-size:14px; font-weight:700; color:#1c2a36">{{ g.nombre }}</span>
+                <span style="font-size:12px; color:#5c6b78">{{ g.meta }}</span>
+                <span style="margin-left:auto; font-family:'IBM Plex Mono', monospace; font-size:14px; font-weight:500; color:{{ g.impColor }}">{{ g.importe }}</span>
+              </button>
+              <sc-if value="{{ g.abierto }}" hint-placeholder-val="{{ false }}">
+                <div style="overflow-x:auto; border-top:1px solid #eaeef1">
+                  <table style="width:100%; border-collapse:collapse; min-width:900px">
+                    <thead>
+                      <tr style="background:#eef1f4">
+                        <sc-for list="{{ g.headers }}" as="h" hint-placeholder-count="8">
+                          <th onClick="{{ h.sort }}" style="text-align:{{ h.align }}; color:{{ h.color }}; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; padding:9px 12px; border-bottom:2px solid #d3dae1; white-space:nowrap; cursor:pointer; user-select:none" style-hover="color:#1d4d7a">{{ h.label }}{{ h.arrow }}</th>
+                        </sc-for>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <sc-for list="{{ g.filas }}" as="f" hint-placeholder-count="6">
+                        <tr style-hover="background:#f6f7f9">
+                          <td style="padding:6px 12px; font-family:'IBM Plex Mono', monospace; font-size:12px; border-top:1px solid #eaeef1; white-space:nowrap">{{ f.fecha }}</td>
+                          <td style="padding:6px 12px; font-family:'IBM Plex Mono', monospace; font-size:12px; border-top:1px solid #eaeef1; white-space:nowrap; color:#5c6b78">{{ f.articulo }}</td>
+                          <td style="padding:6px 12px; font-size:12.5px; border-top:1px solid #eaeef1">{{ f.nombre }}</td>
+                          <td style="padding:6px 12px; font-size:12.5px; border-top:1px solid #eaeef1; white-space:nowrap">{{ f.marca }}</td>
+                          <td style="padding:6px 12px; border-top:1px solid #eaeef1"><span style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; background:{{ f.tipoBg }}; color:{{ f.tipoColor }}">{{ f.tipo }}</span></td>
+                          <td style="padding:6px 12px; font-family:'IBM Plex Mono', monospace; font-size:11.5px; border-top:1px solid #eaeef1; white-space:nowrap; color:#5c6b78">{{ f.comprobante }}</td>
+                          <td style="padding:6px 12px; font-family:'IBM Plex Mono', monospace; font-size:12px; border-top:1px solid #eaeef1; text-align:right">{{ f.cant }}</td>
+                          <td style="padding:6px 12px; font-family:'IBM Plex Mono', monospace; font-size:12px; border-top:1px solid #eaeef1; text-align:right; white-space:nowrap; color:{{ f.impColor }}">{{ f.importe }}</td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ vistaTarjetas }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:10px">
+          <sc-for list="{{ tarjetas }}" as="g" hint-placeholder-count="4">
+            <div style="background:#ffffff; border-radius:16px; box-shadow:0 1px 2px rgba(28,42,54,0.05); overflow:hidden">
+              <button type="button" onClick="{{ g.toggle }}" style="display:flex; align-items:center; gap:12px; width:100%; background:transparent; border:none; padding:12px 16px; cursor:pointer; text-align:left" style-hover="background:#fafbfc">
+                <span style="font-size:12px; color:#5c6b78; width:12px; display:inline-block; transform:{{ g.giro }}; transition:transform 200ms">▸</span>
+                <div style="width:32px; height:32px; border-radius:9px; border:1px solid #eaeef1; background:#ffffff; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0">
+                  <sc-if value="{{ g.tieneLogo }}" hint-placeholder-val="{{ false }}"><img ref="{{ g.logoRef }}" alt="" style="width:100%; height:100%; object-fit:contain; padding:4px; box-sizing:border-box"></sc-if>
+                  <sc-if value="{{ g.sinLogo }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px; font-weight:700; color:#5c6b78">{{ g.iniciales }}</span></sc-if>
+                </div>
+                <span style="font-size:14px; font-weight:700; color:#1c2a36">{{ g.nombre }}</span>
+                <span style="font-size:12px; color:#5c6b78">{{ g.meta }}</span>
+                <span style="margin-left:auto; font-family:'IBM Plex Mono', monospace; font-size:14px; font-weight:500; color:{{ g.impColor }}">{{ g.importe }}</span>
+              </button>
+              <sc-if value="{{ g.abierto }}" hint-placeholder-val="{{ false }}">
+                <div style="overflow-x:auto; border-top:1px solid #eaeef1">
+                  <table style="width:100%; border-collapse:collapse; min-width:640px">
+                    <thead>
+                      <tr style="background:#eef1f4">
+                        <th style="text-align:left; color:#5c6b78; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; padding:9px 12px; border-bottom:2px solid #d3dae1; white-space:nowrap">Marca</th>
+                        <th style="text-align:right; color:#5c6b78; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; padding:9px 12px; border-bottom:2px solid #d3dae1; white-space:nowrap">Cantidad</th>
+                        <th style="text-align:right; color:#5c6b78; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; padding:9px 12px; border-bottom:2px solid #d3dae1; white-space:nowrap">Importe</th>
+                        <th style="text-align:left; color:#5c6b78; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; padding:9px 12px; border-bottom:2px solid #d3dae1; white-space:nowrap; width:34%">Peso en el super</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <sc-for list="{{ g.marcas }}" as="m" hint-placeholder-count="4">
+                        <tr style-hover="background:#f6f7f9">
+                          <td style="padding:8px 12px; font-size:13px; font-weight:600; border-top:1px solid #eaeef1">{{ m.marca }}</td>
+                          <td style="padding:8px 12px; font-family:'IBM Plex Mono', monospace; font-size:12px; text-align:right; border-top:1px solid #eaeef1">{{ m.cant }}</td>
+                          <td style="padding:8px 12px; font-family:'IBM Plex Mono', monospace; font-size:12px; text-align:right; white-space:nowrap; border-top:1px solid #eaeef1; color:{{ m.color }}">{{ m.importe }}</td>
+                          <td style="padding:8px 12px; border-top:1px solid #eaeef1">
+                            <div style="display:flex; align-items:center; gap:8px">
+                              <div style="flex:1; height:6px; background:#eef1f4; border-radius:3px">
+                                <div style="height:6px; border-radius:3px; background:#2f5f8f; width:{{ m.ancho }}"></div>
+                              </div>
+                              <span style="font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:#5c6b78; width:40px; text-align:right">{{ m.peso }}</span>
+                            </div>
+                          </td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sinFilasFact }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#ffffff; border-radius:16px; padding:36px; text-align:center; font-size:13px; color:#5c6b78">Ningún comprobante coincide con los filtros.</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ esEvo }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex; flex-direction:column; gap:14px">
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap">
+        <div style="display:flex; background:#ffffff; border-radius:11px; padding:3px; box-shadow:0 1px 2px rgba(28,42,54,0.05)">
+          <sc-for list="{{ evoMetricas }}" as="m" hint-placeholder-count="3">
+            <button type="button" onClick="{{ m.go }}" style="border:none; border-radius:9px; padding:7px 13px; font-size:12.5px; font-weight:600; cursor:pointer; background:{{ m.bg }}; color:{{ m.color }}">{{ m.label }}</button>
+          </sc-for>
+        </div>
+        <span style="font-size:12.5px; color:#5c6b78">Se arma sola con cada facturación mensual que se carga · hoja “Evolucion”</span>
+      </div>
+
+      <div style="background:#ffffff; border-radius:16px; box-shadow:0 1px 2px rgba(28,42,54,0.05); padding:18px 20px">
+        <div style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#5c6b78; margin-bottom:14px">{{ evoTitulo }}</div>
+        <div style="display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:18px; align-items:end; height:170px">
+          <sc-for list="{{ evoMeses }}" as="m" hint-placeholder-count="5">
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:6px; height:100%">
+              <span style="font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:#1c2a36; white-space:nowrap">{{ m.v }}</span>
+              <div style="width:100%; max-width:84px; height:{{ m.h }}; background:{{ m.bg }}; border-radius:6px 6px 2px 2px"></div>
+              <span style="font-size:12px; font-weight:600; color:#5c6b78">{{ m.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="background:#ffffff; border-radius:16px; box-shadow:0 1px 2px rgba(28,42,54,0.05); overflow-x:auto">
+        <table style="width:100%; border-collapse:collapse; min-width:860px">
+          <thead>
+            <tr style="background:#eef1f4">
+              <th style="text-align:left; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#5c6b78; padding:10px 14px; border-bottom:2px solid #d3dae1">Supermercado</th>
+              <sc-for list="{{ evoHead }}" as="h" hint-placeholder-count="5">
+                <th style="text-align:right; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#5c6b78; padding:10px 14px; border-bottom:2px solid #d3dae1">{{ h.label }}</th>
+              </sc-for>
+              <th style="text-align:right; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#5c6b78; padding:10px 14px; border-bottom:2px solid #d3dae1">Δ vs mes ant.</th>
+              <th style="text-align:left; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#5c6b78; padding:10px 14px; border-bottom:2px solid #d3dae1">Tendencia</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ evoFilas }}" as="r" hint-placeholder-count="8">
+              <tr style-hover="background:#f6f7f9">
+                <td style="padding:8px 14px; font-size:13px; font-weight:600; border-top:1px solid #eaeef1; white-space:nowrap">{{ r.nombre }}</td>
+                <sc-for list="{{ r.celdas }}" as="c" hint-placeholder-count="5">
+                  <td style="padding:8px 14px; font-family:'IBM Plex Mono', monospace; font-size:12px; text-align:right; border-top:1px solid #eaeef1; white-space:nowrap">{{ c.v }}</td>
+                </sc-for>
+                <td style="padding:8px 14px; font-family:'IBM Plex Mono', monospace; font-size:12px; text-align:right; border-top:1px solid #eaeef1; white-space:nowrap; font-weight:600; color:{{ r.deltaColor }}">{{ r.delta }}</td>
+                <td style="padding:8px 14px; border-top:1px solid #eaeef1">
+                  <div style="display:flex; align-items:flex-end; gap:3px; height:22px">
+                    <sc-for list="{{ r.barras }}" as="b" hint-placeholder-count="5">
+                      <div style="width:9px; height:{{ b.h }}; background:{{ b.bg }}; border-radius:2px"></div>
+                    </sc-for>
+                  </div>
+                </td>
+              </tr>
+            </sc-for>
+          </tbody>
+          <tfoot>
+            <tr style="background:#f6f7f9">
+              <td style="padding:11px 14px; font-size:13px; font-weight:700; border-top:2px solid #d3dae1">Total</td>
+              <sc-for list="{{ evoTotales }}" as="c" hint-placeholder-count="5">
+                <td style="padding:11px 14px; font-family:'IBM Plex Mono', monospace; font-size:12.5px; font-weight:700; text-align:right; border-top:2px solid #d3dae1; white-space:nowrap">{{ c.v }}</td>
+              </sc-for>
+              <td style="padding:11px 14px; font-family:'IBM Plex Mono', monospace; font-size:12.5px; font-weight:700; text-align:right; border-top:2px solid #d3dae1; color:{{ evoTotalDeltaColor }}">{{ evoTotalDelta }}</td>
+              <td style="border-top:2px solid #d3dae1"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ esAcu }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex; flex-direction:column; gap:14px">
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:#ffffff; border-radius:16px; box-shadow:0 1px 2px rgba(28,42,54,0.05); padding:14px 16px">
+        <span style="font-size:11.5px; font-weight:700; padding:4px 11px; border-radius:999px; background:{{ acEstadoBg }}; color:{{ acEstadoColor }}">{{ acEstadoLabel }}</span>
+        <span style="font-size:13px; color:#5c6b78; flex:1; min-width:240px">{{ acEstadoDet }}</span>
+        <sc-if value="{{ vendedor }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; gap:8px">
+            <button type="button" onClick="{{ abrirNuevo }}" style="background:#f6f7f9; border:none; border-radius:12px; padding:9px 15px; font-size:13px; font-weight:600; color:#1c2a36; cursor:pointer" style-hover="background:#e8f0f7; color:#1d4d7a">+ Nuevo</button>
+            <button type="button" onClick="{{ guardarAcuerdos }}" disabled="{{ acBloqueado }}" style="background:#1d4d7a; border:none; border-radius:12px; padding:9px 16px; font-size:13px; font-weight:600; color:#ffffff; cursor:pointer; opacity:{{ guardarOp }}" style-hover="background:#1c2a36">Guardar cambios</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ adminRevisa }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; gap:8px">
+            <button type="button" onClick="{{ devolverAcuerdos }}" style="background:#f6f7f9; border:none; border-radius:12px; padding:9px 15px; font-size:13px; font-weight:600; color:#1c2a36; cursor:pointer" style-hover="background:#fbecec; color:#b0433f">Devolver al vendedor</button>
+            <button type="button" onClick="{{ aprobarAcuerdos }}" style="background:#4f7743; border:none; border-radius:12px; padding:9px 16px; font-size:13px; font-weight:600; color:#ffffff; cursor:pointer" style-hover="background:#3d5f33">OK acuerdos del mes</button>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="background:#ffffff; border-radius:16px; box-shadow:0 1px 2px rgba(28,42,54,0.05); overflow-x:auto">
+        <table style="width:100%; border-collapse:collapse; min-width:1180px">
+          <thead>
+            <tr>
+              <th colspan="2" style="padding:8px 14px 0; border-bottom:0"></th>
+              <th colspan="8" style="padding:8px 10px 2px; font-size:10px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#5c6b78; text-align:center; border-bottom:0; background:#eef1f4">Acuerdos fijos · sólo lectura</th>
+              <th colspan="3" style="padding:8px 14px 0; border-bottom:0"></th>
+            </tr>
+            <tr style="background:#eef1f4">
+              <sc-for list="{{ acHead }}" as="h" hint-placeholder-count="12">
+                <th style="text-align:{{ h.align }}; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#5c6b78; padding:9px 10px; border-bottom:2px solid #d3dae1; white-space:nowrap">{{ h.label }}</th>
+              </sc-for>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ acFilas }}" as="r" hint-placeholder-count="10">
+              <tr style-hover="background:#fafbfc">
+                <td style="padding:8px 10px 8px 14px; font-family:'IBM Plex Mono', monospace; font-size:12px; color:#5c6b78; border-top:1px solid #eaeef1">{{ r.codigo }}</td>
+                <td style="padding:8px 10px; border-top:1px solid #eaeef1">
+                  <div style="display:flex; align-items:center; gap:9px">
+                    <div style="width:26px; height:26px; border-radius:8px; border:1px solid #eaeef1; background:#ffffff; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0">
+                      <sc-if value="{{ r.tieneLogo }}" hint-placeholder-val="{{ false }}"><img ref="{{ r.logoRef }}" alt="" style="width:100%; height:100%; object-fit:contain; padding:3px; box-sizing:border-box"></sc-if>
+                      <sc-if value="{{ r.sinLogo }}" hint-placeholder-val="{{ false }}"><span style="font-size:9px; font-weight:700; color:#5c6b78">{{ r.iniciales }}</span></sc-if>
+                    </div>
+                    <span style="font-size:13px; font-weight:600; white-space:nowrap">{{ r.nombre }}</span>
+                  </div>
+                </td>
+                <sc-for list="{{ r.fijos }}" as="c" hint-placeholder-count="8">
+                  <td style="padding:8px 10px; font-family:'IBM Plex Mono', monospace; font-size:12.5px; text-align:center; border-top:1px solid #eaeef1; background:#fafbfc; color:{{ c.color }}; font-weight:{{ c.weight }}">{{ c.v }}</td>
+                </sc-for>
+                <td style="padding:8px 10px; border-top:1px solid #eaeef1; min-width:210px">
+                  <div style="font-family:'IBM Plex Mono', monospace; font-size:12.5px; font-weight:500; color:{{ r.aporteColor }}">{{ r.aporte }}</div>
+                  <div style="font-size:11.5px; color:#5c6b78; margin-top:1px">{{ r.aporteDet }}</div>
+                </td>
+                <td style="padding:8px 10px; border-top:1px solid #eaeef1">
+                  <sc-if value="{{ r.tienePdf }}" hint-placeholder-val="{{ false }}">
+                    <a href="{{ r.pdfUrl }}" onClick="{{ r.abrirPdf }}" title="{{ r.pdf }}" style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:#1d4d7a; background:#e8f0f7; padding:4px 10px; border-radius:999px; max-width:190px">
+                      <span style="font-size:9.5px; font-weight:700; letter-spacing:0.04em; background:#1d4d7a; color:#ffffff; padding:1px 4px; border-radius:4px">PDF</span><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ r.pdf }}</span>
+                    </a>
+                  </sc-if>
+                  <sc-if value="{{ r.sinPdf }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size:12px; color:#8e9aa4">sin acuerdo</span>
+                  </sc-if>
+                </td>
+                <td style="padding:8px 14px 8px 10px; border-top:1px solid #eaeef1; text-align:right">
+                  <button type="button" onClick="{{ r.abrir }}" style="background:{{ r.btnBg }}; border:none; border-radius:10px; padding:6px 12px; font-size:12px; font-weight:600; color:{{ r.btnColor }}; cursor:pointer; white-space:nowrap" style-hover="background:#1d4d7a; color:#ffffff">{{ r.btnLabel }}</button>
+                </td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+
+      <sc-if value="{{ haySolicitudes }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#ffffff; border-radius:16px; box-shadow:0 1px 2px rgba(28,42,54,0.05); padding:16px; display:flex; flex-direction:column; gap:10px">
+          <div style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#5c6b78">Solicitudes del vendedor · supers o acuerdos nuevos</div>
+          <sc-for list="{{ solicitudes }}" as="s" hint-placeholder-count="2">
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; border-top:1px solid #eaeef1; padding-top:10px">
+              <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:260px">
+                <span style="font-size:13.5px; font-weight:700">{{ s.titulo }}</span>
+                <span style="font-size:12px; color:#5c6b78">{{ s.det }}</span>
+              </div>
+              <span style="font-size:11px; font-weight:700; padding:3px 10px; border-radius:999px; background:{{ s.bg }}; color:{{ s.color }}">{{ s.estado }}</span>
+              <sc-if value="{{ s.puedeResolver }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; gap:6px">
+                  <button type="button" onClick="{{ s.rechazar }}" style="background:#f6f7f9; border:none; border-radius:10px; padding:6px 12px; font-size:12px; font-weight:600; color:#5c6b78; cursor:pointer" style-hover="background:#fbecec; color:#b0433f">Rechazar</button>
+                  <button type="button" onClick="{{ s.aprobar }}" style="background:#4f7743; border:none; border-radius:10px; padding:6px 12px; font-size:12px; font-weight:600; color:#ffffff; cursor:pointer">Aprobar</button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ esPrev }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex; flex-direction:column; gap:14px">
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:#ffffff; border-radius:16px; box-shadow:0 1px 2px rgba(28,42,54,0.05); padding:14px 16px">
+        <span style="font-size:11.5px; font-weight:700; padding:4px 11px; border-radius:999px; background:{{ prEstadoBg }}; color:{{ prEstadoColor }}">{{ prEstadoLabel }}</span>
+        <span style="font-size:13px; color:#5c6b78; flex:1; min-width:240px">{{ prEstadoDet }}</span>
+        <sc-if value="{{ adminPuedeOk }}" hint-placeholder-val="{{ false }}">
+          <button type="button" onClick="{{ darOk }}" disabled="{{ okBloqueado }}" title="{{ okTitle }}" style="background:#4f7743; border:none; border-radius:12px; padding:9px 16px; font-size:13px; font-weight:600; color:#ffffff; cursor:pointer; opacity:{{ okOp }}">Dar OK · enviar a provisionar</button>
+        </sc-if>
+        <sc-if value="{{ adminPuedeReabrir }}" hint-placeholder-val="{{ false }}">
+          <button type="button" onClick="{{ reabrirPrev }}" style="background:#f6f7f9; border:none; border-radius:12px; padding:9px 15px; font-size:13px; font-weight:600; color:#1c2a36; cursor:pointer">Volver a revisión</button>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ prevBloqueada }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#ffffff; border-radius:16px; padding:40px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:12px">
+          <span style="font-size:14px; font-weight:700">La previsión de {{ periodoNombre }} se ve cuando guardes los aportes adicionales</span>
+          <span style="font-size:13px; color:#5c6b78">Cargá los aportes del mes en Acuerdos y tocá “Guardar cambios”.</span>
+          <button type="button" onClick="{{ irAcuerdos }}" style="background:#1d4d7a; border:none; border-radius:12px; padding:9px 16px; font-size:13px; font-weight:600; color:#ffffff; cursor:pointer">Ir a Acuerdos</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ prevVisible }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1px; background:#eaeef1; border-radius:14px; overflow:hidden">
+          <sc-for list="{{ dashKpis }}" as="k" hint-placeholder-count="4">
+            <div style="background:#ffffff; padding:14px 16px">
+              <div style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#5c6b78">{{ k.label }}</div>
+              <div style="font-family:'IBM Plex Mono', monospace; font-size:19px; font-weight:500; margin-top:4px; color:{{ k.color }}; white-space:nowrap">{{ k.v }}</div>
+              <div style="font-size:11.5px; color:#5c6b78; margin-top:2px">{{ k.det }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr); gap:14px; align-items:start">
+          <div style="background:#ffffff; border-radius:16px; box-shadow:0 1px 2px rgba(28,42,54,0.05); padding:18px 20px; display:flex; flex-direction:column; gap:10px">
+            <div style="display:flex; align-items:center; gap:14px">
+              <span style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#5c6b78">A provisionar por super</span>
+              <span style="margin-left:auto; display:inline-flex; align-items:center; gap:5px; font-size:11px; color:#5c6b78"><span style="width:10px; height:4px; background:#1d4d7a; border-radius:2px; display:inline-block"></span>{{ periodoNombre }}</span>
+              <span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; color:#5c6b78"><span style="width:10px; height:4px; background:#c3d3e4; border-radius:2px; display:inline-block"></span>{{ periodoAnterior }}</span>
+            </div>
+            <sc-for list="{{ dashBarras }}" as="b" hint-placeholder-count="8">
+              <div style="display:grid; grid-template-columns:130px minmax(0,1fr) 120px 60px; gap:10px; align-items:center">
+                <span style="font-size:12px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ b.nombre }}</span>
+                <div style="display:flex; flex-direction:column; gap:3px">
+                  <div style="height:8px; border-radius:3px; background:#1d4d7a; width:{{ b.wAct }}"></div>
+                  <div style="height:4px; border-radius:2px; background:#c3d3e4; width:{{ b.wAnt }}"></div>
+                </div>
+                <span style="font-family:'IBM Plex Mono', monospace; font-size:11.5px; text-align:right; white-space:nowrap">{{ b.v }}</span>
+                <span style="font-family:'IBM Plex Mono', monospace; font-size:11.5px; font-weight:600; text-align:right; color:{{ b.deltaColor }}">{{ b.delta }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:14px">
+            <div style="background:#ffffff; border-radius:16px; box-shadow:0 1px 2px rgba(28,42,54,0.05); padding:18px 20px; display:flex; flex-direction:column; gap:12px">
+              <span style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#5c6b78">Composición por concepto</span>
+              <div style="display:flex; height:14px; border-radius:7px; overflow:hidden; background:#eef1f4">
+                <sc-for list="{{ dashComp }}" as="c" hint-placeholder-count="5">
+                  <div title="{{ c.label }}" style="height:14px; width:{{ c.ancho }}; background:{{ c.color }}"></div>
+                </sc-for>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:6px">
+                <sc-for list="{{ dashComp }}" as="c" hint-placeholder-count="5">
+                  <div style="display:grid; grid-template-columns:12px minmax(0,1fr) auto 44px; gap:8px; align-items:center; font-size:12px">
+                    <span style="width:10px; height:10px; border-radius:3px; background:{{ c.color }}; display:inline-block"></span>
+                    <span>{{ c.label }}</span>
+                    <span style="font-family:'IBM Plex Mono', monospace; font-size:11.5px; white-space:nowrap">{{ c.v }}</span>
+                    <span style="font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:#5c6b78; text-align:right">{{ c.pct }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="background:#ffffff; border-radius:16px; box-shadow:0 1px 2px rgba(28,42,54,0.05); padding:18px 20px; display:flex; flex-direction:column; gap:8px">
+              <span style="font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#5c6b78">Para revisar antes del OK</span>
+              <sc-for list="{{ dashRevisar }}" as="x" hint-placeholder-count="3">
+                <div style="display:flex; align-items:baseline; gap:10px; border-top:1px solid #eaeef1; padding-top:7px">
+                  <span style="font-size:12.5px; font-weight:600; min-width:120px">{{ x.nombre }}</span>
+                  <span style="font-size:12px; color:{{ x.color }}">{{ x.motivo }}</span>
+                </div>
+              </sc-for>
+              <sc-if value="{{ nadaRevisar }}" hint-placeholder-val="{{ false }}">
+                <span style="font-size:12.5px; color:#4f7743">Sin desvíos ni errores.</span>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; font-size:12px; color:#5c6b78">
+          <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer">
+            <input type="checkbox" checked="{{ ocultarCeros }}" onChange="{{ toggleCeros }}">
+            <span>Ocultar conceptos sin importe</span>
+          </label>
+          <span style="display:inline-flex; align-items:center; gap:6px"><span style="width:9px; height:9px; border-radius:2px; background:#fdf1de; border:1px solid #e8cfa2; display:inline-block"></span>Desvío de
+            <sc-if value="{{ admin }}" hint-placeholder-val="{{ false }}"><input type="number" min="1" max="200" step="1" value="{{ umbralNum }}" onChange="{{ onUmbral }}" title="Umbral de desvío (lo define el admin)" style="width:52px; background:#ffffff; border:1px solid #dde3e8; border-radius:8px; padding:3px 6px; font-family:'IBM Plex Mono', monospace; font-size:12px; color:#1c2a36; text-align:right">%</sc-if>
+            <sc-if value="{{ vendedor }}" hint-placeholder-val="{{ true }}"><span>{{ umbralLabel }}</span></sc-if>
+            o más contra {{ periodoAnterior }}</span>
+          <span style="display:inline-flex; align-items:center; gap:6px"><span style="width:9px; height:9px; border-radius:2px; background:#fbecec; border:1px solid #edc9c7; display:inline-block"></span>Error en la celda del sheet</span>
+          <span style="margin-left:auto">Valores leídos tal cual de la hoja “SALDOS A PROVISIONAR”</span>
+        </div>
+
+        <div style="background:#ffffff; border-radius:16px; box-shadow:0 1px 2px rgba(28,42,54,0.05); overflow-x:auto">
+          <table style="width:100%; border-collapse:collapse">
+            <thead>
+              <tr style="background:#eef1f4">
+                <sc-for list="{{ prHead }}" as="h" hint-placeholder-count="12">
+                  <th style="text-align:{{ h.align }}; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:{{ h.color }}; padding:9px 10px; border-bottom:2px solid #d3dae1; white-space:nowrap; background:{{ h.bg }}">{{ h.label }}</th>
+                </sc-for>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ prFilas }}" as="r" hint-placeholder-count="10">
+                <tr style="background:{{ r.bg }}">
+                  <sc-for list="{{ r.celdas }}" as="c" hint-placeholder-count="12">
+                    <td style="padding:7px 10px; font-family:{{ c.font }}; font-size:12px; text-align:{{ c.align }}; border-top:1px solid #eaeef1; white-space:nowrap; color:{{ c.color }}; background:{{ c.bg }}; font-weight:{{ c.weight }}">{{ c.v }}</td>
+                  </sc-for>
+                </tr>
+              </sc-for>
+            </tbody>
+            <tfoot>
+              <tr style="background:#f6f7f9">
+                <sc-for list="{{ prPie }}" as="c" hint-placeholder-count="12">
+                  <td style="padding:11px 10px; font-family:{{ c.font }}; font-size:12px; font-weight:700; text-align:{{ c.align }}; border-top:2px solid #d3dae1; white-space:nowrap">{{ c.v }}</td>
+                </sc-for>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ esNc }}" hint-placeholder-val="{{ false }}">
+    <div style="background:#ffffff; border-radius:16px; box-shadow:0 1px 2px rgba(28,42,54,0.05); padding:48px 24px; display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center">
+      <span style="font-size:15px; font-weight:700">Control de NC contra previsión</span>
+      <span style="font-size:13px; color:#5c6b78; max-width:520px">Se configura en la próxima etapa. Hoy vive en las hojas “Lista control NC/Pend” y “CONTROL previ”, automatizadas con Apps Script.</span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ admin }}" hint-placeholder-val="{{ true }}">
+    <div style="margin-top:28px; display:flex; justify-content:flex-end">
+      <button type="button" onClick="{{ reiniciar }}" style="background:transparent; border:none; font-size:12px; color:#8e9aa4; cursor:pointer" style-hover="color:#b0433f">Reiniciar estado del prototipo</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ modalAbierto }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ cerrarModal }}" style="position:fixed; inset:0; background:rgba(28,42,54,0.35); display:flex; align-items:center; justify-content:center; padding:24px; z-index:50">
+      <div onClick="{{ frenar }}" style="background:#ffffff; border-radius:18px; box-shadow:0 24px 60px -20px rgba(28,42,54,0.4); width:100%; max-width:{{ modalAncho }}; max-height:calc(100vh - 48px); overflow:auto; padding:22px; display:flex; flex-direction:column; gap:16px">
+        <div style="display:flex; align-items:flex-start; gap:12px">
+          <div style="display:flex; flex-direction:column; gap:3px">
+            <span style="font-size:17px; font-weight:700">{{ modalTitulo }}</span>
+            <span style="font-size:12.5px; color:#5c6b78">{{ modalSub }}</span>
+          </div>
+          <button type="button" onClick="{{ cerrarModal }}" style="margin-left:auto; background:#f6f7f9; border:none; border-radius:999px; width:30px; height:30px; font-size:15px; color:#5c6b78; cursor:pointer">×</button>
+        </div>
+
+        <sc-if value="{{ modalAdic }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; flex-direction:column; gap:10px">
+            <sc-if value="{{ hayAporteSheet }}" hint-placeholder-val="{{ false }}">
+              <div style="background:#f6f7f9; border-radius:12px; padding:10px 12px; font-size:12.5px; color:#5c6b78">Ya en el sheet: <span style="font-family:'IBM Plex Mono', monospace; color:#1c2a36">{{ aporteSheet }}</span> · {{ aporteSheetDet }}</div>
+            </sc-if>
+            <sc-for list="{{ modalFilas }}" as="f" hint-placeholder-count="1">
+              <div style="display:grid; grid-template-columns:140px minmax(0,1fr) minmax(0,1fr) 32px; gap:8px; align-items:end">
+                <label style="display:flex; flex-direction:column; gap:4px; font-size:11px; font-weight:700; color:#5c6b78; text-transform:uppercase; letter-spacing:0.04em">Monto
+                  <input inputMode="decimal" placeholder="$ 0,00" value="{{ f.monto }}" onChange="{{ f.onMonto }}" disabled="{{ f.disabled }}" style="background:#f6f7f9; border:1px solid #eaeef1; border-radius:10px; padding:9px 11px; font-family:'IBM Plex Mono', monospace; font-size:13px; color:#1c2a36; text-transform:none; letter-spacing:0">
+                </label>
+                <label style="display:flex; flex-direction:column; gap:4px; font-size:11px; font-weight:700; color:#5c6b78; text-transform:uppercase; letter-spacing:0.04em">Motivo
+                  <input placeholder="Ej: dinámica sell out" value="{{ f.motivo }}" onChange="{{ f.onMotivo }}" disabled="{{ f.disabled }}" style="background:#f6f7f9; border:1px solid #eaeef1; border-radius:10px; padding:9px 11px; font-size:13px; color:#1c2a36; text-transform:none; letter-spacing:0; font-weight:400">
+                </label>
+                <label style="display:flex; flex-direction:column; gap:4px; font-size:11px; font-weight:700; color:#5c6b78; text-transform:uppercase; letter-spacing:0.04em">Observaciones
+                  <input placeholder="Opcional" value="{{ f.obs }}" onChange="{{ f.onObs }}" disabled="{{ f.disabled }}" style="background:#f6f7f9; border:1px solid #eaeef1; border-radius:10px; padding:9px 11px; font-size:13px; color:#1c2a36; text-transform:none; letter-spacing:0; font-weight:400">
+                </label>
+                <button type="button" onClick="{{ f.quitar }}" disabled="{{ f.disabled }}" title="Quitar" style="height:38px; background:transparent; border:none; font-size:16px; color:#8e9aa4; cursor:pointer; opacity:{{ f.op }}" style-hover="color:#b0433f">×</button>
+              </div>
+            </sc-for>
+            <sc-if value="{{ modalEditable }}" hint-placeholder-val="{{ false }}">
+              <button type="button" onClick="{{ agregarFila }}" style="align-self:flex-start; background:transparent; border:1px dashed #c9d3db; border-radius:10px; padding:8px 14px; font-size:12.5px; font-weight:600; color:#1d4d7a; cursor:pointer">+ Agregar otro aporte</button>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ modalComp }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid #eaeef1; border-radius:12px; overflow:auto; max-height:56vh">
+            <table style="width:100%; border-collapse:collapse">
+              <thead>
+                <tr style="background:#eef1f4">
+                  <th style="text-align:left; color:#5c6b78; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; padding:9px 12px; border-bottom:2px solid #d3dae1; white-space:nowrap">Fecha</th>
+                  <th style="text-align:left; color:#5c6b78; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; padding:9px 12px; border-bottom:2px solid #d3dae1; white-space:nowrap">Super</th>
+                  <th style="text-align:left; color:#5c6b78; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; padding:9px 12px; border-bottom:2px solid #d3dae1; white-space:nowrap">Comprobante</th>
+                  <th style="text-align:left; color:#5c6b78; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; padding:9px 12px; border-bottom:2px solid #d3dae1; white-space:nowrap">Artículo</th>
+                  <th style="text-align:right; color:#5c6b78; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; padding:9px 12px; border-bottom:2px solid #d3dae1; white-space:nowrap">Importe</th>
+                  <th style="text-align:left; color:#5c6b78; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; padding:9px 12px; border-bottom:2px solid #d3dae1; white-space:nowrap">Observación</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ compFilas }}" as="f" hint-placeholder-count="5">
+                  <tr>
+                    <td style="padding:6px 12px; font-family:'IBM Plex Mono', monospace; font-size:12px; border-top:1px solid #eaeef1; white-space:nowrap">{{ f.fecha }}</td>
+                    <td style="padding:6px 12px; font-size:12.5px; font-weight:600; border-top:1px solid #eaeef1; white-space:nowrap">{{ f.super }}</td>
+                    <td style="padding:6px 12px; font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:#5c6b78; border-top:1px solid #eaeef1; white-space:nowrap">{{ f.comprobante }}</td>
+                    <td style="padding:6px 12px; font-size:12px; border-top:1px solid #eaeef1">{{ f.nombre }}</td>
+                    <td style="padding:6px 12px; font-family:'IBM Plex Mono', monospace; font-size:12px; text-align:right; white-space:nowrap; border-top:1px solid #eaeef1; color:{{ f.color }}">{{ f.importe }}</td>
+                    <td style="padding:6px 12px; font-size:12px; color:#1c2a36; border-top:1px solid #eaeef1; min-width:180px">{{ f.obs }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+              <tfoot>
+                <tr style="background:#f6f7f9">
+                  <td colspan="4" style="padding:10px 12px; font-size:12.5px; font-weight:700; border-top:2px solid #d3dae1">Total</td>
+                  <td style="padding:10px 12px; font-family:'IBM Plex Mono', monospace; font-size:12.5px; font-weight:700; text-align:right; white-space:nowrap; border-top:2px solid #d3dae1">{{ compTotal }}</td>
+                  <td style="border-top:2px solid #d3dae1"></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ modalNuevo }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; flex-direction:column; gap:14px">
+            <label style="display:flex; flex-direction:column; gap:4px; font-size:11px; font-weight:700; color:#5c6b78; text-transform:uppercase; letter-spacing:0.04em">Supermercado
+              <select value="{{ nvSuper }}" onChange="{{ onNvSuper }}" style="background:#f6f7f9; border:1px solid #eaeef1; border-radius:10px; padding:9px 11px; font-size:13px; color:#1c2a36; text-transform:none; letter-spacing:0; font-weight:400">
+                <option value="">Elegí un supermercado…</option>
+                <sc-for list="{{ superOpts }}" as="o" hint-placeholder-count="4">
+                  <option value="{{ o.id }}">{{ o.nombre }}</option>
+                </sc-for>
+                <option value="__nuevo">Supermercado nuevo…</option>
+              </select>
+            </label>
+            <sc-if value="{{ nvEsNuevo }}" hint-placeholder-val="{{ false }}">
+              <input placeholder="Nombre del supermercado nuevo" value="{{ nvSuperNuevo }}" onChange="{{ onNvSuperNuevo }}" style="background:#f6f7f9; border:1px solid #eaeef1; border-radius:10px; padding:9px 11px; font-size:13px; color:#1c2a36">
+            </sc-if>
+
+            <div style="display:flex; flex-direction:column; gap:8px">
+              <span style="font-size:11px; font-weight:700; color:#5c6b78; text-transform:uppercase; letter-spacing:0.04em">Acuerdos fijos</span>
+              <sc-for list="{{ nvFijos }}" as="f" hint-placeholder-count="1">
+                <div style="display:grid; grid-template-columns:minmax(0,1fr) 110px 32px; gap:8px">
+                  <select value="{{ f.concepto }}" onChange="{{ f.onConcepto }}" style="background:#f6f7f9; border:1px solid #eaeef1; border-radius:10px; padding:9px 11px; font-size:13px; color:#1c2a36">
+                    <sc-for list="{{ conceptoOpts }}" as="o" hint-placeholder-count="8">
+                      <option value="{{ o.k }}">{{ o.label }}</option>
+                    </sc-for>
+                  </select>
+                  <input inputMode="decimal" placeholder="%" value="{{ f.pct }}" onChange="{{ f.onPct }}" style="background:#f6f7f9; border:1px solid #eaeef1; border-radius:10px; padding:9px 11px; font-family:'IBM Plex Mono', monospace; font-size:13px; color:#1c2a36">
+                  <button type="button" onClick="{{ f.quitar }}" style="background:transparent; border:none; font-size:16px; color:#8e9aa4; cursor:pointer" style-hover="color:#b0433f">×</button>
+                </div>
+              </sc-for>
+              <button type="button" onClick="{{ agregarFijo }}" style="align-self:flex-start; background:transparent; border:1px dashed #c9d3db; border-radius:10px; padding:7px 13px; font-size:12.5px; font-weight:600; color:#1d4d7a; cursor:pointer">+ Otro acuerdo fijo</button>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:8px">
+              <span style="font-size:11px; font-weight:700; color:#5c6b78; text-transform:uppercase; letter-spacing:0.04em">Acuerdos adicionales</span>
+              <sc-for list="{{ nvAdic }}" as="f" hint-placeholder-count="1">
+                <div style="display:grid; grid-template-columns:140px minmax(0,1fr) 32px; gap:8px">
+                  <input inputMode="decimal" placeholder="$ 0,00" value="{{ f.monto }}" onChange="{{ f.onMonto }}" style="background:#f6f7f9; border:1px solid #eaeef1; border-radius:10px; padding:9px 11px; font-family:'IBM Plex Mono', monospace; font-size:13px; color:#1c2a36">
+                  <input placeholder="Motivo" value="{{ f.motivo }}" onChange="{{ f.onMotivo }}" style="background:#f6f7f9; border:1px solid #eaeef1; border-radius:10px; padding:9px 11px; font-size:13px; color:#1c2a36">
+                  <button type="button" onClick="{{ f.quitar }}" style="background:transparent; border:none; font-size:16px; color:#8e9aa4; cursor:pointer" style-hover="color:#b0433f">×</button>
+                </div>
+              </sc-for>
+              <button type="button" onClick="{{ agregarAdicNuevo }}" style="align-self:flex-start; background:transparent; border:1px dashed #c9d3db; border-radius:10px; padding:7px 13px; font-size:12.5px; font-weight:600; color:#1d4d7a; cursor:pointer">+ Otro acuerdo adicional</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <div style="display:flex; justify-content:flex-end; gap:8px; padding-top:4px">
+          <button type="button" onClick="{{ cerrarModal }}" style="background:#f6f7f9; border:none; border-radius:12px; padding:9px 16px; font-size:13px; font-weight:600; color:#5c6b78; cursor:pointer">{{ cancelarLabel }}</button>
+          <sc-if value="{{ modalEditable }}" hint-placeholder-val="{{ false }}">
+            <button type="button" onClick="{{ guardarModal }}" style="background:#1d4d7a; border:none; border-radius:12px; padding:9px 18px; font-size:13px; font-weight:600; color:#ffffff; cursor:pointer" style-hover="background:#1c2a36">{{ guardarLabel }}</button>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;umbralDesvio&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:25,&quot;min&quot;:5,&quot;max&quot;:80,&quot;step&quot;:5,&quot;unit&quot;:&quot;%&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Previsiones&quot;},&quot;tabInicial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;facturacion&quot;,&quot;evolucion&quot;,&quot;acuerdos&quot;,&quot;previsiones&quot;,&quot;nc&quot;],&quot;default&quot;:&quot;facturacion&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;General&quot;}}">class Component extends DCLogic {
+  state = {
+    D: null, rol: "admin", tab: null, msg: "",
+    vista: "listado", fq: "", fSuper: "", fMarca: "", fTipo: "", fDesde: "", fHasta: "",
+    abiertos: {}, fSort: { key: "fecha", dir: 1 }, factRows: null,
+    factInfo: { cargadoEn: "2026-09-02T10:14:00", origen: "Excel del ERP" },
+    evoMetrica: "fact",
+    adicionales: {}, acEstado: "borrador", solicitudes: [],
+    previEstado: "revision", ocultarCeros: true, modal: null
+  };
+  factFileRef = React.createRef();
+  KEY = "pya-v1";
+
+  componentDidMount() {
+    let g = {};
+    try { g = JSON.parse(localStorage.getItem(this.KEY) || "{}"); } catch (e) {}
+    import("./previsiones-datos.js").then(M => {
+      const D = JSON.parse(JSON.stringify({ periodo: M.periodo, supers: M.supers, acuerdos: M.acuerdos, previsiones: M.previsiones, evolucion: M.evolucion, facturacion: M.facturacion }));
+      this.setState(Object.assign({}, g, { D }));
+    }).catch(e => console.error(e));
+  }
+  persist() {
+    const s = this.state;
+    try {
+      localStorage.setItem(this.KEY, JSON.stringify({
+        rol: s.rol, tab: s.tab, adicionales: s.adicionales, acEstado: s.acEstado, solicitudes: s.solicitudes,
+        previEstado: s.previEstado, factInfo: s.factInfo, ocultarCeros: s.ocultarCeros, umbral: s.umbral
+      }));
+    } catch (e) {}
+  }
+  set(p) { this.setState(p, () => this.persist()); }
+
+  nf(n, d) { return new Intl.NumberFormat("es-AR", { minimumFractionDigits: d ?? 2, maximumFractionDigits: d ?? 2 }).format(n || 0); }
+  money(n) { return (n < 0 ? "-" : "") + "$ " + this.nf(Math.abs(n)); }
+  corto(n) { const a = Math.abs(n), s = n < 0 ? "-" : ""; if (a >= 1e6) return s + "$ " + this.nf(a / 1e6, 1) + "M"; if (a >= 1e3) return s + "$ " + this.nf(a / 1e3, 0) + "k"; return s + "$ " + this.nf(a, 0); }
+  pct(n, d) { return this.nf(n * 100, d ?? 0) + "%"; }
+  fecha(iso) { if (!iso) return "—"; const p = iso.slice(0, 10).split("-"); return p[2] + "/" + p[1] + "/" + p[0]; }
+  num(v) { const n = parseFloat(String(v ?? "").replace(/[^\d,.-]/g, "").replace(/\./g, "").replace(",", ".")); return isNaN(n) ? 0 : n; }
+  logo(s) {
+    return {
+      tieneLogo: !!s.logo, sinLogo: !s.logo,
+      logoRef: el => { if (el) el.src = "logos/" + s.id + ".png"; },
+      iniciales: s.corto.split(/\s+/).map(w => w[0]).slice(0, 2).join("")
+    };
+  }
+
+  async importarFact(e) {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    if (this.state.factInfo && !window.confirm("Ya hay facturación cargada de " + this.state.D.periodo.nombre + ". Queda fija todo el mes.\n\n¿Reemplazarla con " + file.name + "?")) return;
+    try {
+      const mod = await import("./facturacion-lite.js");
+      const rows = await mod.leerFacturacion(file, this.state.D.supers);
+      this.set({ factRows: rows, factInfo: { cargadoEn: new Date().toISOString(), origen: file.name }, msg: "Facturación importada: " + rows.length + " líneas." });
+    } catch (err) { this.setState({ msg: "No se pudo leer el archivo: " + err.message }); }
+  }
+  async leerHoja() {
+    try {
+      const r = await fetch("/api/previsiones/facturacion");
+      if (!r.ok) throw new Error();
+      const data = await r.json();
+      this.set({ factRows: data.filas, factInfo: { cargadoEn: new Date().toISOString(), origen: "Hoja Facturación" }, msg: "Facturación leída de la hoja: " + data.filas.length + " líneas." });
+    } catch (e) { this.setState({ msg: "Leer la hoja “Facturación” funciona cuando esté el backend (/api/previsiones/facturacion). Por ahora usá Importar Excel." }); }
+  }
+
+  // Un Excel con una hoja por subpestaña. Facturación respeta los filtros aplicados.
+  async exportar({ D, rows, P, ANT, PCONC, CONC, mesesLbl, dlt }) {
+    const st = this.state;
+    const nom = id => (D.supers.find(s => s.id === id) || { corto: id }).corto;
+    const n2 = v => typeof v === "number" ? Math.round(v * 100) / 100 : v;
+    const hojas = [];
+    hojas.push({ nombre: "Facturación", filas: [["Fecha", "Supermercado", "Artículo", "Nombre", "Marca", "Tipo", "Comprobante", "Cantidad", "Importe", "Observación"]]
+      .concat(rows.map(r => [this.fecha(r.fecha), nom(r.superId), r.articulo, r.nombre, r.marca, r.tipo, r.comprobante, r.cantidad, n2(r.importe), r.observacion || ""])) });
+    const pm = {};
+    rows.forEach(r => { const k = r.superId + "|" + r.marca; const x = pm[k] || (pm[k] = { s: r.superId, m: r.marca, c: 0, i: 0 }); x.i += r.importe; if (r.tipo !== "NC") x.c += r.cantidad; });
+    hojas.push({ nombre: "Marcas por super", filas: [["Supermercado", "Marca", "Cantidad", "Importe"]]
+      .concat(Object.values(pm).map(x => [nom(x.s), x.m, x.c, n2(x.i)])) });
+    const ncnd = rows.filter(r => r.tipo !== "Factura");
+    hojas.push({ nombre: "NC y ND", filas: [["Fecha", "Supermercado", "Tipo", "Comprobante", "Artículo", "Importe", "Observación"]]
+      .concat(ncnd.map(r => [this.fecha(r.fecha), nom(r.superId), r.tipo, r.comprobante, r.nombre, n2(r.importe), r.observacion || ""])) });
+    const ev = [["Supermercado", "Métrica"].concat(mesesLbl)];
+    D.supers.forEach(s => { const e = D.evolucion.porSuper[s.id]; if (!e) return;
+      [["fact", "Facturación"], ["unid", "Unidades"], ["nc", "Notas de crédito"]].forEach(([k, l]) => ev.push([s.corto, l].concat(e[k].map(n2)))); });
+    hojas.push({ nombre: "Evolución", filas: ev });
+    hojas.push({ nombre: "Acuerdos", filas: [["Código", "Supermercado"].concat(CONC.map(c => c[1] + " %")).concat(["Aporte adicional (sheet)", "Detalle", "Aportes del vendedor", "Detalle vendedor", "Acuerdo firmado", "Estado del mes"])]
+      .concat(D.supers.map(s => { const a = D.acuerdos[s.id] || { fijos: {}, aporte: {} }; const ex = st.adicionales[s.id] || [];
+        return [s.codigo, s.corto].concat(CONC.map(([k]) => a.fijos[k] ?? "")).concat([n2(a.aporte.monto || 0), a.aporte.detalle || "",
+          n2(ex.reduce((t, f) => t + this.num(f.monto), 0)), ex.map(f => (f.motivo || "") + (f.obs ? " (" + f.obs + ")" : "")).join(" · "),
+          a.pdf ? a.pdf.nombre : "sin acuerdo", { borrador: "En carga", enviado: "Enviado a control", aprobado: "Aprobado" }[st.acEstado]]); })) });
+    if (st.solicitudes.length) hojas.push({ nombre: "Solicitudes", filas: [["Fecha", "Supermercado", "Alta nueva", "Fijos", "Adicionales", "Estado"]]
+      .concat(st.solicitudes.map(s => [this.fecha(s.fecha), s.nombre, s.esNuevo ? "Sí" : "No", s.fijos.map(f => f.concepto + " " + f.pct + "%").join(", "),
+        s.adic.map(f => f.monto + (f.motivo ? " " + f.motivo : "")).join(", "), s.estado])) });
+    const pc = [["facturacion", "Facturación"], ["pctFact", "% Fact"]].concat(PCONC).concat([["adicion", "Adición"], ["pctVar", "% s/fact. variable"], ["total", "Total a provisionar"]]);
+    hojas.push({ nombre: "Previsiones", filas: [["Código", "Supermercado"].concat(pc.map(c => c[1])).concat([D.periodo.anterior, "Δ %", "Estado"])]
+      .concat(P.map(r => { const s = D.supers.find(x => x.id === r.id), ant = ANT[r.id] || 0, d = dlt(r.total, ant);
+        return [s.codigo, s.corto].concat(pc.map(([k]) => n2(r[k]))).concat([n2(ant), d == null ? "" : Math.round(d * 1000) / 10,
+          st.previEstado === "enviado" ? "Enviado a provisionar" : "En revisión"]); })) });
+    try {
+      const mod = await import("./xlsx-writer.js");
+      mod.descargarXlsx("Previsiones y acuerdos - " + D.periodo.nombre + ".xlsx", hojas);
+    } catch (e) { this.setState({ msg: "No se pudo generar el Excel: " + e.message }); }
+  }
+
+  updModal(lista, i, k, v) {
+    this.setState(s => { const m = Object.assign({}, s.modal); m[lista] = m[lista].map((r, j) => j === i ? Object.assign({}, r, { [k]: v }) : r); return { modal: m }; });
+  }
+  addModal(lista, fila) { this.setState(s => { const m = Object.assign({}, s.modal); m[lista] = m[lista].concat([fila]); return { modal: m }; }); }
+  delModal(lista, i) { this.setState(s => { const m = Object.assign({}, s.modal); m[lista] = m[lista].filter((r, j) => j !== i); return { modal: m }; }); }
+
+  guardarModal() {
+    const m = this.state.modal, D = this.state.D;
+    if (m.tipo === "adic") {
+      const filas = m.filas.filter(f => this.num(f.monto) || (f.motivo || "").trim());
+      this.set({ adicionales: Object.assign({}, this.state.adicionales, { [m.id]: filas }), modal: null });
+    } else {
+      const esNuevo = m.superId === "__nuevo";
+      const nombre = esNuevo ? (m.superNuevo || "").trim() : ((D.supers.find(s => s.id === m.superId) || {}).corto || "");
+      if (!nombre) { window.alert("Elegí o escribí el supermercado."); return; }
+      const fijos = m.fijos.filter(f => (f.pct || "").trim());
+      const adic = m.adic.filter(f => this.num(f.monto) || (f.motivo || "").trim());
+      if (!fijos.length && !adic.length && !esNuevo) { window.alert("Cargá al menos un acuerdo fijo o adicional."); return; }
+      const sol = { id: Date.now(), nombre, esNuevo, fijos, adic, estado: "pendiente", fecha: new Date().toISOString() };
+      this.set({ solicitudes: this.state.solicitudes.concat([sol]), modal: null, msg: "Solicitud enviada a administración." });
+    }
+  }
+
+  renderVals() {
+    const D = this.state.D;
+    const admin = this.state.rol === "admin";
+    const umbral = (this.state.umbral ?? this.props.umbralDesvio ?? 25) / 100;
+    const tab = this.state.tab || this.props.tabInicial || "facturacion";
+    const st = this.state;
+    const base = {
+      admin, vendedor: !admin,
+      adminBg: admin ? "#1c2a36" : "transparent", adminColor: admin ? "#ffffff" : "#5c6b78",
+      vendBg: admin ? "transparent" : "#1c2a36", vendColor: admin ? "#5c6b78" : "#ffffff",
+      verAdmin: () => this.set({ rol: "admin" }), verVendedor: () => this.set({ rol: "vendedor" }),
+      hayMsg: !!st.msg, msg: st.msg, cerrarMsg: () => this.setState({ msg: "" }),
+      reiniciar: () => { if (window.confirm("¿Volver el prototipo al estado inicial?")) { try { localStorage.removeItem(this.KEY); } catch (e) {} this.setState({ adicionales: {}, acEstado: "borrador", solicitudes: [], previEstado: "revision", factRows: null, factInfo: { cargadoEn: "2026-09-02T10:14:00", origen: "Excel del ERP" }, msg: "" }); } },
+      esFact: tab === "facturacion", esEvo: tab === "evolucion", esAcu: tab === "acuerdos", esPrev: tab === "previsiones", esNc: tab === "nc",
+      periodoNombre: D ? D.periodo.nombre : "", periodoAnterior: D ? D.periodo.anterior : "",
+      superOpts: D ? D.supers.map(s => ({ id: s.id, nombre: s.corto })) : []
+    };
+    if (!D) return Object.assign(base, { pasos: [], tabs: [], factKpis: [], grupos: [], tarjetas: [] });
+
+    const CONC = [["acc", "ACC"], ["escala", "Escala crecim."], ["noDev", "No dev"], ["log", "Log"], ["publ", "Publ"], ["voraz", "Voraz"], ["criadores", "Criadores"], ["kongo", "Kongo"]];
+    const pendientesSol = st.solicitudes.filter(s => s.estado === "pendiente").length;
+
+    const paso = (n, label, det, estado) => ({ n, label, det,
+      dotBg: estado === "ok" ? "#eaf2e5" : estado === "act" ? "#1d4d7a" : "#eef1f4",
+      dotColor: estado === "ok" ? "#4f7743" : estado === "act" ? "#ffffff" : "#8e9aa4",
+      detColor: estado === "ok" ? "#4f7743" : estado === "act" ? "#1d4d7a" : "#8e9aa4" });
+    const pasos = [
+      paso("1", "Facturación", st.factInfo ? "Cargada" : "Pendiente", st.factInfo ? "ok" : "act"),
+      paso("2", "Aportes del vendedor", st.acEstado === "borrador" ? "En carga" : "Guardados", st.acEstado === "borrador" ? "act" : "ok"),
+      paso("3", "Control admin", st.acEstado === "aprobado" ? "Aprobado" : st.acEstado === "enviado" ? "Para revisar" : "—", st.acEstado === "aprobado" ? "ok" : st.acEstado === "enviado" ? "act" : "pend"),
+      paso("4", "Previsión", st.previEstado === "enviado" ? "Enviado a provisionar" : "En revisión", st.previEstado === "enviado" ? "ok" : st.acEstado === "aprobado" ? "act" : "pend")
+    ];
+    const T = [["facturacion", "Facturación", ""], ["evolucion", "Evolución", ""],
+      ["acuerdos", "Acuerdos", admin ? (st.acEstado === "enviado" ? "Revisar" : pendientesSol ? String(pendientesSol) : "") : (st.acEstado === "borrador" ? "Cargar" : "")],
+      ["previsiones", "Previsiones", st.previEstado === "enviado" ? "Enviado" : ""], ["nc", "Control NC", ""]];
+    const tabs = T.map(([k, label, badge]) => ({ label, badge, tieneBadge: !!badge,
+      badgeBg: badge === "Enviado" ? "#eaf2e5" : "#fdf1de", badgeColor: badge === "Enviado" ? "#4f7743" : "#a06816",
+      line: tab === k ? "#1d4d7a" : "transparent", color: tab === k ? "#1c2a36" : "#5c6b78", go: () => this.set({ tab: k }) }));
+
+    // Facturación
+    const all = st.factRows || D.facturacion;
+    const q = st.fq.trim().toLowerCase();
+    const rows = all.filter(r => (!st.fSuper || r.superId === st.fSuper) && (!st.fMarca || r.marca === st.fMarca) && (!st.fTipo || r.tipo === st.fTipo)
+      && (!st.fDesde || r.fecha >= st.fDesde) && (!st.fHasta || r.fecha <= st.fHasta)
+      && (!q || (r.nombre + " " + r.articulo + " " + r.comprobante).toLowerCase().includes(q)));
+    const sum = (rs, f) => rs.reduce((t, r) => t + f(r), 0);
+    const tipoSt = t => t === "NC" ? ["#fbecec", "#b0433f"] : t === "ND" ? ["#fdf1de", "#a06816"] : ["#eef1f4", "#1c2a36"];
+    const fc = [["fecha", "Fecha", "left"], ["articulo", "Artículo", "left"], ["nombre", "Nombre", "left"], ["marca", "Marca", "left"], ["tipo", "Tipo", "left"], ["comprobante", "Comprobante", "left"], ["cantidad", "Cant.", "right"], ["importe", "Importe", "right"]];
+    const so = st.fSort;
+    const headers = fc.map(([k, label, align]) => ({ label, align, arrow: so.key === k ? (so.dir === 1 ? " ↑" : " ↓") : "",
+      color: so.key === k ? "#1d4d7a" : "#5c6b78", sort: () => this.setState({ fSort: { key: k, dir: so.key === k ? -so.dir : 1 } }) }));
+    const sorter = (a, b) => { const x = a[so.key], y = b[so.key]; return (typeof x === "number" ? x - y : String(x).localeCompare(String(y), "es")) * so.dir; };
+    const grupos = [], tarjetas = [];
+    D.supers.forEach(s => {
+      const rs = rows.filter(r => r.superId === s.id);
+      if (!rs.length) return;
+      const imp = sum(rs, r => r.importe), unid = sum(rs.filter(r => r.tipo !== "NC"), r => r.cantidad);
+      const meta = rs.length + " líneas · " + this.nf(unid, 0) + " unidades";
+      const abierto = !!st.abiertos[s.id];
+      grupos.push(Object.assign(this.logo(s), {
+        key: s.id, nombre: s.corto, meta, importe: this.money(imp), impColor: imp < 0 ? "#b0433f" : "#1c2a36",
+        abierto, giro: abierto ? "rotate(90deg)" : "rotate(0deg)", headers,
+        toggle: () => this.setState(x => ({ abiertos: Object.assign({}, x.abiertos, { [s.id]: !x.abiertos[s.id] }) })),
+        filas: abierto ? rs.slice().sort(sorter).map((r, i) => { const [tb, tc] = tipoSt(r.tipo); return {
+          key: i, fecha: this.fecha(r.fecha), articulo: r.articulo, nombre: r.nombre, marca: r.marca, tipo: r.tipo, tipoBg: tb, tipoColor: tc,
+          comprobante: r.comprobante, cant: this.nf(r.cantidad, 0), importe: this.money(r.importe), impColor: r.importe < 0 ? "#b0433f" : "#1c2a36" }; }) : []
+      }));
+      const porMarca = {};
+      rs.forEach(r => { const m = porMarca[r.marca] || (porMarca[r.marca] = { cant: 0, imp: 0 }); m.imp += r.importe; if (r.tipo !== "NC") m.cant += r.cantidad; });
+      const lista = Object.keys(porMarca).map(k => ({ marca: k, cant: porMarca[k].cant, imp: porMarca[k].imp })).sort((a, b) => b.imp - a.imp);
+      const max = Math.max(1, ...lista.map(m => Math.abs(m.imp)));
+      const abiertoM = !!(st.abiertosM || {})[s.id];
+      const totAbs = lista.reduce((t, m) => t + Math.abs(m.imp), 0) || 1;
+      tarjetas.push(Object.assign(this.logo(s), { key: s.id, nombre: s.corto, meta: lista.length + (lista.length === 1 ? " marca" : " marcas"),
+        importe: this.money(imp), impColor: imp < 0 ? "#b0433f" : "#1c2a36",
+        abierto: abiertoM, giro: abiertoM ? "rotate(90deg)" : "rotate(0deg)",
+        toggle: () => this.setState(x => ({ abiertosM: Object.assign({}, x.abiertosM, { [s.id]: !(x.abiertosM || {})[s.id] }) })),
+        marcas: lista.map(m => ({ key: m.marca, marca: m.marca, cant: this.nf(m.cant, 0), importe: this.money(m.imp), color: m.imp < 0 ? "#b0433f" : "#1c2a36",
+          ancho: Math.round(Math.abs(m.imp) / max * 100) + "%", peso: this.pct(Math.abs(m.imp) / totAbs) })) }));
+    });
+    const fct = rows.filter(r => r.tipo === "Factura"), ncs = rows.filter(r => r.tipo === "NC"), nds = rows.filter(r => r.tipo === "ND");
+    const kpi = (label, v, det, color, tipo, lista) => ({ label, v, det, color,
+      fijo: !tipo, cursor: tipo ? "pointer" : "default", hover: tipo ? "#f6f9fc" : "#ffffff", accion: tipo && lista.length ? "Ver detalle →" : "",
+      abrir: () => { if (tipo && lista.length) this.setState({ modal: { tipo: "comp", comp: tipo } }); } });
+    const factKpis = [
+      kpi("Facturado neto", this.money(sum(rows, r => r.importe)), "Facturas − NC + ND · sin impuestos", "#1c2a36"),
+      kpi("Facturas", this.money(sum(fct, r => r.importe)), fct.length + " líneas · antes de NC, sin impuestos", "#1c2a36"),
+      kpi("Notas de crédito", this.money(sum(ncs, r => r.importe)), ncs.length + " líneas", "#b0433f", "NC", ncs),
+      kpi("Notas de débito", this.money(sum(nds, r => r.importe)), nds.length + " líneas", "#a06816", "ND", nds)
+    ];
+    const marcas = [...new Set(all.map(r => r.marca))].sort();
+    const ev = e => e.target.value;
+
+    // Evolución
+    const met = st.evoMetrica;
+    const evoFmt = v => met === "unid" ? this.nf(v, 0) : this.corto(v);
+    const mesesLbl = D.evolucion.meses.map(m => ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"][+m.slice(5) - 1] + " " + m.slice(2, 4));
+    const evoRows = D.supers.map(s => ({ s, vals: (D.evolucion.porSuper[s.id] || {})[met] || [] })).filter(x => x.vals.some(v => v));
+    const tot = mesesLbl.map((_, i) => evoRows.reduce((t, x) => t + (x.vals[i] || 0), 0));
+    const maxTot = Math.max(1, ...tot.map(Math.abs));
+    const dlt = (a, b) => b ? (a - b) / Math.abs(b) : null;
+    const dTxt = d => d == null ? "—" : (d > 0 ? "+" : "") + this.pct(d);
+    const dCol = (d, inv) => d == null || Math.abs(d) < umbral ? "#5c6b78" : ((d > 0) !== !!inv ? "#4f7743" : "#b0433f");
+    const totD = dlt(tot[tot.length - 1], tot[tot.length - 2]);
+
+    // Acuerdos
+    const acBloq = st.acEstado !== "borrador";
+    const acFilas = D.supers.map(s => {
+      const a = D.acuerdos[s.id] || { fijos: {}, aporte: { monto: 0, detalle: "" } };
+      const extra = st.adicionales[s.id] || [];
+      const totAp = (a.aporte.monto || 0) + sum(extra, f => this.num(f.monto));
+      const puedeEditar = !admin && !acBloq;
+      const partes = [];
+      if (a.aporte.detalle) partes.push(a.aporte.detalle);
+      if (extra.length) partes.push(extra.length + (extra.length === 1 ? " aporte cargado" : " aportes cargados") + " por el vendedor");
+      return Object.assign(this.logo(s), {
+        key: s.id, codigo: s.codigo, nombre: s.corto,
+        fijos: CONC.map(([k]) => { const v = a.fijos[k]; return { key: k, v: v ? v + "%" : "·", color: v ? "#1c2a36" : "#c3ccd4", weight: v ? 600 : 400 }; }),
+        aporte: totAp ? this.money(totAp) : "—", aporteColor: totAp ? "#1c2a36" : "#8e9aa4",
+        aporteDet: partes.join(" · ") || "Sin aportes este mes",
+        tienePdf: !!a.pdf, sinPdf: !a.pdf, pdf: a.pdf ? a.pdf.nombre : "", pdfUrl: a.pdf && a.pdf.url ? a.pdf.url : "#",
+        abrirPdf: e => { if (!(a.pdf && a.pdf.url)) { e.preventDefault(); this.setState({ msg: "El link al PDF de “" + a.pdf.nombre + "” lo trae el backend desde la columna M (Drive)." }); } },
+        btnLabel: puedeEditar ? "+ Agregar" : "Ver", btnBg: puedeEditar ? "#e8f0f7" : "#f6f7f9", btnColor: puedeEditar ? "#1d4d7a" : "#5c6b78",
+        abrir: () => this.setState({ modal: { tipo: "adic", id: s.id, editable: puedeEditar,
+          filas: extra.length ? extra.map(f => Object.assign({}, f)) : (puedeEditar ? [{ monto: "", motivo: "", obs: "" }] : []) } })
+      });
+    });
+    const acHead = [["Cód.", "left"], ["Supermercado", "left"]].concat(CONC.map(([, l]) => [l, "center"])).concat([["Aportes adicionales del mes", "left"], ["Acuerdo firmado", "left"], ["", "right"]]).map(([label, align]) => ({ label, align }));
+    const acE = {
+      borrador: ["En carga", "#fdf1de", "#a06816", admin ? "El vendedor está cargando los aportes adicionales de " + D.periodo.nombre + "." : "Cargá los aportes adicionales del mes y tocá “Guardar cambios”. Después no se pueden modificar."],
+      enviado: ["Enviado a control", "#e8f0f7", "#1d4d7a", admin ? "El vendedor guardó los aportes. Revisalos y aprobá para copiarlos a la base." : "Guardaste los aportes de " + D.periodo.nombre + ". Administración los está controlando."],
+      aprobado: ["Aprobado", "#eaf2e5", "#4f7743", "Aportes de " + D.periodo.nombre + " aprobados y copiados a la base."]
+    }[st.acEstado];
+    const solicitudes = st.solicitudes.slice().reverse().map(s => ({
+      key: s.id, titulo: (s.esNuevo ? "Alta de supermercado: " : "Nuevo acuerdo para ") + s.nombre,
+      det: [s.fijos.length ? "Fijos: " + s.fijos.map(f => (CONC.find(c => c[0] === f.concepto) || [0, f.concepto])[1] + " " + f.pct + "%").join(", ") : "",
+        s.adic.length ? "Adicionales: " + s.adic.map(f => this.money(this.num(f.monto)) + (f.motivo ? " (" + f.motivo + ")" : "")).join(", ") : "",
+        "enviada " + this.fecha(s.fecha)].filter(Boolean).join(" · "),
+      estado: s.estado === "pendiente" ? "Pendiente" : s.estado === "aprobada" ? "Aprobada" : "Rechazada",
+      bg: s.estado === "pendiente" ? "#fdf1de" : s.estado === "aprobada" ? "#eaf2e5" : "#fbecec",
+      color: s.estado === "pendiente" ? "#a06816" : s.estado === "aprobada" ? "#4f7743" : "#b0433f",
+      puedeResolver: admin && s.estado === "pendiente",
+      aprobar: () => this.set({ solicitudes: st.solicitudes.map(x => x.id === s.id ? Object.assign({}, x, { estado: "aprobada" }) : x) }),
+      rechazar: () => this.set({ solicitudes: st.solicitudes.map(x => x.id === s.id ? Object.assign({}, x, { estado: "rechazada" }) : x) })
+    }));
+
+    // Previsiones: valores tal cual del sheet; sólo se compara contra el mes anterior
+    const P = D.previsiones.actual, ANT = D.previsiones.anterior;
+    const PCONC = [["acc", "ACC"], ["noDev", "No dev"], ["log", "Log"], ["publ", "Publ"], ["escala", "Esc. crecim."], ["voraz", "Voraz"], ["criadores", "Criadores"], ["kongo", "Kongo"]];
+    const visibles = PCONC.filter(([k]) => !st.ocultarCeros || P.some(r => typeof r[k] === "number" && r[k] !== 0));
+    const cols = [["codigo", "Cód.", "int"], ["nombre", "Supermercado", "txt"], ["facturacion", "Facturación", "money"], ["pctFact", "% Fact", "pct"]]
+      .concat(visibles.map(([k, l]) => [k, l, "money"]))
+      .concat([["adicion", "Adición", "money"], ["pctVar", "% s/fact. variable", "pct"], ["total", "Total a provisionar", "money"], ["anterior", D.periodo.anterior, "money"], ["delta", "Δ", "delta"]]);
+    const esErr = v => typeof v === "string" && v.startsWith("#");
+    const prFilas = P.map(r => {
+      const s = D.supers.find(x => x.id === r.id);
+      const ant = ANT[r.id] || 0, d = dlt(r.total, ant);
+      const desvio = d != null && Math.abs(d) >= umbral;
+      const row = Object.assign({}, r, { codigo: s.codigo, nombre: s.corto, anterior: ant, delta: d });
+      return { key: r.id, bg: desvio ? "#fffaf1" : "transparent",
+        celdas: cols.map(([k, , t]) => { const v = row[k]; const err = esErr(v);
+          const txt = err ? v : t === "money" ? (v ? this.money(v) : "—") : t === "pct" ? (v ? this.pct(v) : "0%") : t === "delta" ? dTxt(v) : String(v);
+          return { key: k, v: txt, align: t === "txt" ? "left" : "right", font: t === "txt" ? "inherit" : "'IBM Plex Mono', monospace",
+            bg: err ? "#fbecec" : k === "total" ? "#f3f6f9" : (k === "delta" && desvio ? "#fdf1de" : "transparent"),
+            color: err ? "#b0433f" : k === "delta" ? (desvio ? "#a06816" : "#5c6b78") : (t === "money" && !v ? "#b7c0c8" : (typeof v === "number" && v < 0 ? "#b0433f" : "#1c2a36")),
+            weight: err || k === "total" || (k === "delta" && desvio) ? 700 : (t === "txt" ? 600 : 400) }; }) };
+    });
+    const totalAct = sum(P, r => r.total), totalAnt = sum(P, r => ANT[r.id] || 0), totalFact = sum(P, r => typeof r.facturacion === "number" ? r.facturacion : 0);
+    const prPie = cols.map(([k, , t]) => {
+      let v = "";
+      if (k === "nombre") v = "Subtotales";
+      else if (t === "money") v = this.money(k === "anterior" ? totalAnt : sum(P, r => typeof r[k] === "number" ? r[k] : 0));
+      else if (k === "delta") v = dTxt(dlt(totalAct, totalAnt));
+      return { key: k, v, align: t === "txt" ? "left" : "right", font: t === "txt" ? "inherit" : "'IBM Plex Mono', monospace" };
+    });
+    const prHead = cols.map(([k, l, t]) => ({ key: k, label: l, align: t === "txt" ? "left" : "right", color: k === "total" ? "#1d4d7a" : "#5c6b78", bg: k === "total" ? "#e3eaf1" : "transparent" }));
+    const revisar = [];
+    P.forEach(r => {
+      const s = D.supers.find(x => x.id === r.id), ant = ANT[r.id] || 0, d = dlt(r.total, ant);
+      const errs = Object.keys(r).filter(k => esErr(r[k]));
+      if (errs.length) revisar.push({ key: r.id + "e", nombre: s.corto, motivo: "Celda con " + r[errs[0]] + " en “" + (errs[0] === "pctVar" ? "% s/fact. variable" : errs[0]) + "”", color: "#b0433f" });
+      if (d != null && Math.abs(d) >= umbral) revisar.push({ key: r.id + "d", nombre: s.corto, motivo: (d > 0 ? "Sube " : "Baja ") + this.pct(Math.abs(d)) + " vs " + D.periodo.anterior + " (" + this.corto(ant) + " → " + this.corto(r.total) + ")", color: "#a06816" });
+      if (r.facturacion < 0) revisar.push({ key: r.id + "f", nombre: s.corto, motivo: "Facturación neta negativa (" + this.money(r.facturacion) + ")", color: "#b0433f" });
+    });
+    const barrasSrc = P.filter(r => r.total || ANT[r.id]).sort((a, b) => b.total - a.total);
+    const maxB = Math.max(1, ...barrasSrc.map(r => Math.max(r.total, ANT[r.id] || 0)));
+    const compCols = ["#1d4d7a", "#2f5f8f", "#4a7aa8", "#7096bd", "#9ab4d1", "#c3d3e4", "#a06816", "#4f7743", "#5c6b78"];
+    const compSrc = PCONC.concat([["adicion", "Adición"]]).map(([k, l]) => ({ k, l, v: sum(P, r => typeof r[k] === "number" ? r[k] : 0) })).filter(x => x.v);
+    const compTot = sum(compSrc, x => x.v) || 1;
+    const prevBloq = !admin && st.acEstado === "borrador";
+    const prE = st.previEstado === "enviado"
+      ? ["Enviado a provisionar", "#eaf2e5", "#4f7743", "Administración dio el OK a la previsión de " + D.periodo.nombre + "."]
+      : ["En revisión", "#fdf1de", "#a06816", admin ? "Revisá desvíos y errores. Cuando esté todo bien, dá el OK." : "Administración está revisando la previsión de " + D.periodo.nombre + "."];
+
+    const m = st.modal;
+    const mS = m && m.tipo === "adic" ? D.supers.find(s => s.id === m.id) : null;
+    const mA = mS ? D.acuerdos[mS.id] : null;
+    const compLista = m && m.tipo === "comp" ? rows.filter(r => r.tipo === m.comp).slice().sort((a, b) => a.fecha.localeCompare(b.fecha)) : [];
+
+    return Object.assign(base, {
+      pasos, tabs,
+      factTitulo: "Facturación de " + D.periodo.nombre,
+      factEstado: st.factInfo ? "Cargada el " + this.fecha(st.factInfo.cargadoEn) + " desde " + st.factInfo.origen + " · queda fija hasta la carga del mes próximo" : "Todavía no se cargó la facturación del mes.",
+      factFileRef: this.factFileRef,
+      abrirArchivoFact: () => this.factFileRef.current && this.factFileRef.current.click(),
+      onArchivoFact: e => this.importarFact(e), leerHojaFact: () => this.leerHoja(),
+      factKpis, grupos, tarjetas,
+      vistaListado: st.vista === "listado" && rows.length > 0, vistaTarjetas: st.vista === "tarjetas" && rows.length > 0, sinFilasFact: rows.length === 0,
+      verListado: () => this.setState({ vista: "listado" }), verTarjetas: () => this.setState({ vista: "tarjetas" }),
+      listadoBg: st.vista === "listado" ? "#1d4d7a" : "transparent", listadoColor: st.vista === "listado" ? "#ffffff" : "#5c6b78",
+      tarjetasBg: st.vista === "tarjetas" ? "#1d4d7a" : "transparent", tarjetasColor: st.vista === "tarjetas" ? "#ffffff" : "#5c6b78",
+      fq: st.fq, fSuper: st.fSuper, fMarca: st.fMarca, fTipo: st.fTipo, fDesde: st.fDesde, fHasta: st.fHasta,
+      onFq: e => this.setState({ fq: ev(e) }), onFSuper: e => this.setState({ fSuper: ev(e) }), onFMarca: e => this.setState({ fMarca: ev(e) }),
+      onFTipo: e => this.setState({ fTipo: ev(e) }), onFDesde: e => this.setState({ fDesde: ev(e) }), onFHasta: e => this.setState({ fHasta: ev(e) }),
+      hayFiltros: !!(st.fq || st.fSuper || st.fMarca || st.fTipo || st.fDesde || st.fHasta),
+      limpiarFiltros: () => this.setState({ fq: "", fSuper: "", fMarca: "", fTipo: "", fDesde: "", fHasta: "" }),
+      marcaOpts: marcas.map(v => ({ v })),
+      evoMetricas: [["fact", "Facturación"], ["unid", "Unidades"], ["nc", "Notas de crédito"]].map(([k, label]) => ({ label, go: () => this.setState({ evoMetrica: k }), bg: met === k ? "#1d4d7a" : "transparent", color: met === k ? "#ffffff" : "#5c6b78" })),
+      evoTitulo: { fact: "Facturación total por mes", unid: "Unidades vendidas por mes", nc: "Notas de crédito por mes" }[met],
+      evoMeses: tot.map((v, i) => ({ key: i, label: mesesLbl[i], v: evoFmt(v), h: Math.max(4, Math.round(Math.abs(v) / maxTot * 120)) + "px", bg: i === tot.length - 1 ? "#1d4d7a" : "#c3d3e4" })),
+      evoHead: mesesLbl.map(label => ({ label })),
+      evoFilas: evoRows.map(x => { const mx = Math.max(1, ...x.vals.map(Math.abs)); const d = dlt(x.vals[x.vals.length - 1], x.vals[x.vals.length - 2]);
+        return { key: x.s.id, nombre: x.s.corto, celdas: x.vals.map((v, i) => ({ key: i, v: evoFmt(v) })), delta: dTxt(d), deltaColor: dCol(d, met === "nc"),
+          barras: x.vals.map((v, i) => ({ key: i, h: Math.max(2, Math.round(Math.abs(v) / mx * 22)) + "px", bg: i === x.vals.length - 1 ? "#1d4d7a" : "#c3d3e4" })) }; }),
+      evoTotales: tot.map((v, i) => ({ key: i, v: evoFmt(v) })), evoTotalDelta: dTxt(totD), evoTotalDeltaColor: dCol(totD, met === "nc"),
+      acHead, acFilas, acBloqueado: acBloq, guardarOp: acBloq ? 0.4 : 1,
+      acEstadoLabel: acE[0], acEstadoBg: acE[1], acEstadoColor: acE[2], acEstadoDet: acE[3],
+      adminRevisa: admin && st.acEstado === "enviado",
+      guardarAcuerdos: () => { if (window.confirm("Vas a guardar los aportes adicionales de " + D.periodo.nombre + ".\nDespués no se pueden modificar y pasan a control de administración.\n\n¿Confirmás?")) this.set({ acEstado: "enviado", msg: "Aportes guardados y enviados a control." }); },
+      aprobarAcuerdos: () => { if (window.confirm("¿Aprobar los aportes del vendedor y copiarlos a la base?")) this.set({ acEstado: "aprobado", msg: "Aportes aprobados. Ya podés revisar y dar el OK en Previsiones." }); },
+      devolverAcuerdos: () => { if (window.confirm("¿Devolver los aportes al vendedor para que los corrija?")) this.set({ acEstado: "borrador" }); },
+      abrirNuevo: () => this.setState({ modal: { tipo: "nuevo", editable: true, superId: "", superNuevo: "", fijos: [{ concepto: "acc", pct: "" }], adic: [{ monto: "", motivo: "" }] } }),
+      haySolicitudes: solicitudes.length > 0, solicitudes,
+      prEstadoLabel: prE[0], prEstadoBg: prE[1], prEstadoColor: prE[2], prEstadoDet: prevBloq ? "Disponible cuando guardes los aportes del mes." : prE[3],
+      adminPuedeOk: admin && st.previEstado !== "enviado", adminPuedeReabrir: admin && st.previEstado === "enviado",
+      okBloqueado: st.acEstado !== "aprobado", okOp: st.acEstado !== "aprobado" ? 0.4 : 1,
+      okTitle: st.acEstado !== "aprobado" ? "Primero aprobá los aportes del vendedor en Acuerdos" : "",
+      darOk: () => { if (window.confirm("¿Confirmás la previsión de " + D.periodo.nombre + " por " + this.money(totalAct) + "?\nEl vendedor la va a ver como “Enviado a provisionar”.")) this.set({ previEstado: "enviado", msg: "Previsión enviada a provisionar." }); },
+      reabrirPrev: () => this.set({ previEstado: "revision" }),
+      prevBloqueada: prevBloq, prevVisible: !prevBloq, irAcuerdos: () => this.set({ tab: "acuerdos" }),
+      ocultarCeros: st.ocultarCeros, toggleCeros: () => this.set({ ocultarCeros: !st.ocultarCeros }),
+      umbralLabel: Math.round(umbral * 100) + "%",
+      umbralNum: String(Math.round(umbral * 100)),
+      onUmbral: e => { const n = parseInt(ev(e), 10); if (n > 0 && n <= 200) this.set({ umbral: n }); },
+      prHead, prFilas, prPie,
+      dashKpis: [
+        { label: "Total a provisionar", v: this.money(totalAct), det: D.periodo.nombre, color: "#1d4d7a" },
+        { label: "vs " + D.periodo.anterior, v: dTxt(dlt(totalAct, totalAnt)), det: this.money(totalAnt) + " el mes anterior", color: dCol(dlt(totalAct, totalAnt), true) },
+        { label: "Sobre facturación", v: this.pct(totalAct / (totalFact || 1), 1), det: "de " + this.corto(totalFact) + " facturados", color: "#1c2a36" },
+        { label: "Para revisar", v: String(new Set(revisar.map(x => x.nombre)).size), det: "supers con desvío o error", color: revisar.length ? "#a06816" : "#4f7743" }
+      ],
+      dashBarras: barrasSrc.map(r => { const ant = ANT[r.id] || 0, d = dlt(r.total, ant);
+        return { key: r.id, nombre: D.supers.find(s => s.id === r.id).corto, v: this.corto(r.total), wAct: Math.max(0.5, r.total / maxB * 100) + "%", wAnt: Math.max(0.5, ant / maxB * 100) + "%", delta: dTxt(d), deltaColor: d != null && Math.abs(d) >= umbral ? "#a06816" : "#5c6b78" }; }),
+      dashComp: compSrc.map((x, i) => ({ key: x.k, label: x.l, v: this.corto(x.v), pct: this.pct(x.v / compTot), ancho: (x.v / compTot * 100) + "%", color: compCols[i % compCols.length] })),
+      dashRevisar: revisar, nadaRevisar: revisar.length === 0,
+      modalAbierto: !!m, frenar: e => e.stopPropagation(), cerrarModal: () => this.setState({ modal: null }),
+      modalAdic: !!m && m.tipo === "adic", modalNuevo: !!m && m.tipo === "nuevo", modalComp: !!m && m.tipo === "comp", modalEditable: !!m && m.editable,
+      modalTitulo: !m ? "" : m.tipo === "adic" ? "Aportes adicionales · " + mS.corto : m.tipo === "comp" ? (m.comp === "NC" ? "Notas de crédito" : "Notas de débito") + " · " + D.periodo.nombre : "Nuevo supermercado o acuerdo",
+      modalSub: !m ? "" : m.tipo === "adic" ? (m.editable ? D.periodo.nombre + " · podés cargar más de uno" : D.periodo.nombre + " · sólo lectura") : m.tipo === "comp" ? compLista.length + " líneas · respeta los filtros aplicados" : "Se envía a administración para aprobar",
+      compFilas: compLista.map((r, i) => ({ key: i, fecha: this.fecha(r.fecha), super: (D.supers.find(s => s.id === r.superId) || { corto: r.cliente }).corto,
+        comprobante: r.comprobante, nombre: r.nombre, importe: this.money(r.importe), color: r.importe < 0 ? "#b0433f" : "#1c2a36", obs: r.observacion || "—" })),
+      modalAncho: m && m.tipo === "comp" ? "1040px" : "640px",
+      exportar: () => this.exportar({ D, rows, P, ANT, PCONC, CONC, mesesLbl, dlt }),
+      compTotal: this.money(sum(compLista, r => r.importe)),
+      hayAporteSheet: !!(mA && mA.aporte.monto), aporteSheet: mA ? this.money(mA.aporte.monto) : "", aporteSheetDet: mA ? (mA.aporte.detalle || "sin detalle") : "",
+      modalFilas: m && m.tipo === "adic" ? m.filas.map((f, i) => ({ key: i, monto: f.monto, motivo: f.motivo, obs: f.obs, disabled: !m.editable, op: m.editable ? 1 : 0,
+        onMonto: e => this.updModal("filas", i, "monto", ev(e)), onMotivo: e => this.updModal("filas", i, "motivo", ev(e)), onObs: e => this.updModal("filas", i, "obs", ev(e)),
+        quitar: () => this.delModal("filas", i) })) : [],
+      agregarFila: () => this.addModal("filas", { monto: "", motivo: "", obs: "" }),
+      nvSuper: m && m.tipo === "nuevo" ? m.superId : "", nvEsNuevo: !!m && m.superId === "__nuevo", nvSuperNuevo: m ? m.superNuevo || "" : "",
+      onNvSuper: e => { const v = ev(e); this.setState(s => ({ modal: Object.assign({}, s.modal, { superId: v }) })); },
+      onNvSuperNuevo: e => { const v = ev(e); this.setState(s => ({ modal: Object.assign({}, s.modal, { superNuevo: v }) })); },
+      conceptoOpts: CONC.map(([k, label]) => ({ k, label })),
+      nvFijos: m && m.tipo === "nuevo" ? m.fijos.map((f, i) => ({ key: i, concepto: f.concepto, pct: f.pct,
+        onConcepto: e => this.updModal("fijos", i, "concepto", ev(e)), onPct: e => this.updModal("fijos", i, "pct", ev(e)), quitar: () => this.delModal("fijos", i) })) : [],
+      nvAdic: m && m.tipo === "nuevo" ? m.adic.map((f, i) => ({ key: i, monto: f.monto, motivo: f.motivo,
+        onMonto: e => this.updModal("adic", i, "monto", ev(e)), onMotivo: e => this.updModal("adic", i, "motivo", ev(e)), quitar: () => this.delModal("adic", i) })) : [],
+      agregarFijo: () => this.addModal("fijos", { concepto: "acc", pct: "" }), agregarAdicNuevo: () => this.addModal("adic", { monto: "", motivo: "" }),
+      cancelarLabel: m && m.editable ? "Cancelar" : "Cerrar",
+      guardarLabel: m && m.tipo === "nuevo" ? "Enviar solicitud" : "Guardar aportes",
+      guardarModal: () => this.guardarModal()
+    });
+  }
+}</script>
+</body>
+</html>

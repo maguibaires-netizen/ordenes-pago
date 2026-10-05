@@ -37,7 +37,9 @@ export async function obtenerResumenPendientes() {
 }
 
 export async function obtenerFacturacion() {
-  const res = await fetch("/api/previsiones/facturacion");
+  const res = await fetch("/api/previsiones/facturacion", {
+    headers: { "x-auth-token": tokenActual() },
+  });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Error al leer Facturación");
   return data;
